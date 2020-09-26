@@ -8,7 +8,8 @@ class LoggingTest(TestCase):
     # Patch fspath to prevent a test log file being created
     @patch("opendoors.logging.os.fspath")
     def test_logger(self, mock):
-        logger = Logging(".", "test").logger()
+        mock().return_value = "path"
+        logger = Logging("path", "test").logger()
         handlers = logger.handlers
         self.assertEqual(20, logger.level)
         self.assertEquals(6, len(handlers))
