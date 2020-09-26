@@ -12,7 +12,7 @@ def get_full_path(path):
     """
     Return the absolute path based on the supplied fragment
     :param path: A relative path fragment. If this is already the absolute path, just return it.
-    :return:
+    :return: The absolute path.
     """
     return join(path) if Path(path).is_absolute() else join(ROOT_DIR, path)
 
@@ -23,7 +23,7 @@ def make_banner(border_char: chr, banner_text: str, padding=2):
     :param border_char: The character to use for the top and bottom border.
     :param banner_text: The text to display in the banner, including any leading
     :param padding: Optional. The number of spaces to put on either side of the text.
-    :return:
+    :return: The bannered string.
     """
     width = len(banner_text) + (padding * 2)
     banner_border = border_char.ljust(width, border_char)
@@ -37,7 +37,7 @@ def set_working_dir(path=None, code_name=""):
     Use provided path or prompt user to accept or change default path
     :param path: Optional. The complete path including archive code name to use as a working directory.
     :param code_name: Optional. The short code name for the archive. Ignored if `path` is provided.
-    :return:
+    :return: The new working directory.
     """
     if path is None:
         _working_dir = os.path.join(os.path.expanduser("~"), "otw_opendoors", code_name)
@@ -60,3 +60,21 @@ def set_working_dir(path=None, code_name=""):
         return False
     else:
         return _working_dir
+
+
+def print_progress(current, total, text="stories"):
+    """
+    Print constantly updating progress text to the command line, in the form `current/total item_name`. Note that this
+    increments current, so no need to do that in the calling code.
+    :param current: current number
+    :param total: total number
+    :param text: text to display after the counters
+    :return: updated progress text on the same line as the previous print out
+    """
+    current += 1
+    import sys
+    sys.stdout.write(f'\r{current}/{total} {text}')
+    if current >= total:
+        sys.stdout.write("\n")
+    sys.stdout.flush()
+    return current
