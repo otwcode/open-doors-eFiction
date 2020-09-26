@@ -1,11 +1,11 @@
-# open-doors-eFiction
+# Open Doors eFiction Converter
 Script to convert eFiction for use in the Open Doors import process
 
-# Pre-requisites
+## Pre-requisites
 
 1. Python 3.7+
 
-# Quickstart
+## Quickstart
 
 1. Ensure you are using Python 3
 1. (Optional) Create or load a [virtualenv wrapper](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv) for this project.

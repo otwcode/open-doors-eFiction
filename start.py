@@ -1,5 +1,6 @@
 import sys
 
+from opendoors.config import ArchiveConfig
 from opendoors.logging import Logging
 from opendoors.utils import make_banner, set_working_dir
 
