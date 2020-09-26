@@ -1,14 +1,11 @@
 import sys
 
-
-def make_banner(border_char, banner_text):
-    banner_border = border_char.ljust(len(banner_text), border_char)
-    return f"\n{banner_border}\n{banner_text}\n{banner_border}"
-
+from opendoors.logging import Logging
+from opendoors.utils import make_banner, set_working_dir
 
 if __name__ == '__main__':
     """
-    Syntax: python3 start.py CODENAME ROOT_PATH_TO_USE
+    Syntax: python3 start.py [CODENAME] [ROOT_PATH_TO_USE]
     Example: python3 start.py mvw /users/me/otw_opendoors
     Prompts user if no codename is given, and uses an "otw_opendoors" in the user's home directory if no root path given
     """
@@ -22,3 +19,11 @@ if __name__ == '__main__':
     banner_text = f"""Starting processing for archive "{code_name}"..."""
     banner = make_banner('=', banner_text)
 
+    path = sys.argv[2] if len(sys.argv) > 2 else None
+    working_dir = set_working_dir(path, code_name)
+
+    logger = Logging(working_dir, code_name).logger()
+    logger.info(banner)
+
+    config = ArchiveConfig(logger, code_name, working_dir)
+    archive_config = config.config
