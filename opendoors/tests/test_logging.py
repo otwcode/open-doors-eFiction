@@ -5,11 +5,8 @@ from opendoors.logging import Logging
 
 
 class LoggingTest(TestCase):
-    # Patch fspath to prevent a test log file being created
-    @patch("opendoors.logging.os.fspath")
-    def test_logger(self, mock):
-        mock().return_value = "path"
-        logger = Logging("path", "test").logger()
+    def test_logger(self):
+        logger = Logging(".", "test").logger()
         handlers = logger.handlers
         self.assertEqual(20, logger.level)
         self.assertEquals(6, len(handlers))
