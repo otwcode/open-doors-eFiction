@@ -5,6 +5,7 @@ from typing import Tuple
 
 import pymysql
 import sqlparse
+from pymysql import Error
 
 from opendoors.utils import get_full_path
 
