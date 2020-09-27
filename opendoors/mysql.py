@@ -3,9 +3,8 @@ from configparser import ConfigParser
 from logging import Logger
 from typing import Tuple
 
-import mysql.connector
+import pymysql
 import sqlparse
-from mysql.connector import Error
 
 from opendoors.utils import get_full_path
 
@@ -14,10 +13,10 @@ class SqlDb:
     """
     Wrapper and helper methods for MySQL commands
     """
-    def __init__(self, config: ConfigParser, logger: Logger):
+    def __init__(self, config: ConfigParser, logger: Logger, conn=None):
         self.config = config
         self.logger = logger
-        self.conn = mysql.connector.connect(**self.get_db_config())
+        self.conn = pymysql.connect(**self.get_db_config()) if conn is None else conn
         self.logger.info(f"Connected to MySQL database server at {self.config['Database']['host']} "
                          f"as {self.config['Database']['user']}")
 
@@ -147,7 +146,7 @@ class SqlDb:
                 field_arr = []
                 for field in row:
                     if type(field) == str:
-                        field_arr.append("'" + self.conn.converter.escape(field) + "'")
+                        field_arr.append(self.conn.escape(field))
                     elif field is None:
                         field_arr.append("NULL")
                     else:
