@@ -35,12 +35,10 @@ To run the tests, use Pytest:
 python -m pytest
 ```
 
-Continuous Integration is provided by GitHub Actions, configured in the `.github/workflows` folder.
-
-To run the GitHub Actions locally, use https://github.com/nektos/act (run with `act -P ubuntu-latest=nektos/act-environments-ubuntu:18.04' if you're on MacOS)
+Continuous Integration is provided by GitHub Actions, configured in the `.github/workflows` folder. There are separate workflows for Linux vs MacOS and Windows because as of September 2020, the latter don't support services.
 
 ## Known Issues
-#### Refusing to allow an OAuth App
+#### "Refusing to allow an OAuth App" when pushing to GitHub
 ```
 !	refs/heads/supporting-files:refs/heads/supporting-files	[remote rejected] (refusing to allow an OAuth App to create or update workflow `.github/workflows/python-app.yml` without `workflow` scope)
 ```
@@ -54,9 +52,3 @@ The Github repository uses Github Actions to automatically run tests when you ra
 1. You will need to recreate your application's integration with Github using the new token for the change to take effect.
 
 If this doesn't work, use the command line Git command `git push` to push your code instead.
-
-#### Can't run GitHub Actions in Act on MacOS
-Run act with:
-```
-act -P ubuntu-latest=nektos/act-environments-ubuntu:18.04
-```

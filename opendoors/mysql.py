@@ -14,10 +14,10 @@ class SqlDb:
     """
     Wrapper and helper methods for MySQL commands
     """
-    def __init__(self, config: ConfigParser, logger: Logger, conn=None):
+    def __init__(self, config: ConfigParser, logger: Logger):
         self.config = config
         self.logger = logger
-        self.conn = pymysql.connect(**self.get_db_config()) if conn is None else conn
+        self.conn = pymysql.connect(**self.get_db_config())
         self.logger.info(f"Connected to MySQL database server at {self.config['Database']['host']} "
                          f"as {self.config['Database']['user']}")
 
