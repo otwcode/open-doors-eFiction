@@ -24,8 +24,21 @@ Script to convert eFiction for use in the Open Doors import process
     - `PATH-TO-WORKING-DIRECTORY` is the root directory where you want the working files to go (a subdirectory named after the CODENAME above will be created in this directory).
 1. Follow the instructions on screen.
 
+## Development
+
+### Tests
+Unit tests are situated in `tests` folders within each package. Fixtures are stored in `test_data`. Some tests output artefacts to a `test_output` folder.
+
+To run the tests, use Pytest:
+
+```
+python -m pytest
+```
+
+Continuous Integration is provided by GitHub Actions, configured in the `.github/workflows` folder. There are separate workflows for Linux vs MacOS and Windows because as of September 2020, the latter don't support services.
+
 ## Known Issues
-# Refusing to allow an OAuth App
+#### "Refusing to allow an OAuth App" when pushing to GitHub
 ```
 !	refs/heads/supporting-files:refs/heads/supporting-files	[remote rejected] (refusing to allow an OAuth App to create or update workflow `.github/workflows/python-app.yml` without `workflow` scope)
 ```
