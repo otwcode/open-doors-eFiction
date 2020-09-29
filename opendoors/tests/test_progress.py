@@ -2,16 +2,15 @@ from logging import Logger
 
 from configparser import ConfigParser
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from opendoors.config import ArchiveConfig
-from opendoors.mysql import SqlDb
 from opendoors.progress import continue_from_last
 from opendoors.step_base import StepBase, StepInfo
 
-test_logger = Logger("test")
+test_logger = MagicMock()
 test_config: ConfigParser = ArchiveConfig(test_logger, "efiction", "opendoors/tests/test_data").config
-test_sql = SqlDb(test_config, test_logger)
+test_sql = MagicMock()
 
 
 class Step1(StepBase):
