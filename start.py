@@ -1,8 +1,36 @@
+import atexit
+import configparser
+
 import sys
 
+from opendoors import progress
 from opendoors.config import ArchiveConfig
 from opendoors.logging import Logging
+from opendoors.mysql import SqlDb
+from opendoors.step_base import StepInfo
 from opendoors.utils import make_banner, set_working_dir
+from steps import step_01, step_02, step_03, step_04
+
+steps = {
+    '01': {'info': StepInfo(next_step='02', step_description='Load original database', step_number='01'),
+           'class': step_01.Step01},
+    '02': {'info': StepInfo(next_step='03', step_description='Create simplified database', step_number='02'),
+           'class': step_02.Step02},
+    '03': {'info': StepInfo(next_step='04', step_description='Convert metadata to Open Doors tables', step_number='03'),
+           'class': step_03.Step03},
+    '04': {
+        'info': StepInfo(next_step='None', step_description='Load chapters into Open Doors tables', step_number='04'),
+        'class': step_04.Step04}
+}
+
+config = configparser.ConfigParser()
+
+
+@atexit.register
+def save_config_and_exit():
+    print("Saving config...")
+    config.save()
+
 
 if __name__ == '__main__':
     """
@@ -28,3 +56,7 @@ if __name__ == '__main__':
 
     config = ArchiveConfig(logger, code_name, working_dir)
     archive_config = config.config
+
+    sql = SqlDb(archive_config, logger)
+
+    progress.continue_from_last(archive_config, logger, sql, steps)
