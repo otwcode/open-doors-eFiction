@@ -5,7 +5,7 @@ from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
 from opendoors.config import ArchiveConfig
-from opendoors.progress import continue_from_last
+from opendoors.progress import continue_from_last, update_done_steps, get_next_step
 from opendoors.step_base import StepBase, StepInfo
 
 test_logger = MagicMock()
@@ -36,8 +36,30 @@ steps = {
 
 
 class TestProgress(TestCase):
+    # This patch responds '2' to every prompt and makes it run all the steps in turn
     @patch('builtins.input', lambda *args: '2')
     def test_continue_from_last(self):
-        thing = continue_from_last(test_config, test_logger, test_sql, steps)
-        self.assertIsNone(thing)
+        continue_from_last(test_config, test_logger, test_sql, steps)
         self.assertSetEqual(set("01, 02".split(', ')), set(test_config['Processing']['done_steps'].split(', ')))
+
+    def test_update_done_steps(self):
+        done_steps = update_done_steps(test_config, ["01", "02"], "03")
+        self.assertEqual("01, 02, 03", done_steps)
+
+    @patch('builtins.input', lambda *args: '2')
+    def test_get_next_step_after_01(self):
+        next_step, done_steps = get_next_step(test_config, "01")
+        self.assertEqual("01", next_step)
+        self.assertEqual([], done_steps)
+
+    @patch('builtins.input', lambda *args: '2')
+    def test_get_next_step_after_02(self):
+        next_step, done_steps = get_next_step(test_config, "02")
+        self.assertEqual("02", next_step)
+        self.assertListEqual(['01', '02'], done_steps)
+
+    @patch('builtins.input', lambda *args: '1')
+    def test_get_next_step_with_restart(self):
+        next_step, done_steps = get_next_step(test_config, "02")
+        self.assertEqual("01", next_step)
+        self.assertEqual([], done_steps)

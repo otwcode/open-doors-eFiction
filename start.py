@@ -28,6 +28,9 @@ config = configparser.ConfigParser()
 
 @atexit.register
 def save_config_and_exit():
+    """
+    Save config on exit
+    """
     print("Saving config...")
     config.save()
 
