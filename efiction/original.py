@@ -91,7 +91,7 @@ class EFictionOriginal:
 
     def __load_into_database(self, step_path, statements):
         """
-
+        Load edited SQL statements into the database and write out to a file.
         :param step_path: the destination path for the edited file
         :param statements: the edited SQL statements
         :return:
