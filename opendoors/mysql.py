@@ -1,4 +1,3 @@
-import traceback
 from configparser import ConfigParser
 from logging import Logger
 from typing import Tuple
