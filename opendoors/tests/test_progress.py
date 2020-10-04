@@ -11,10 +11,6 @@ from opendoors.config import ArchiveConfig
 from opendoors.progress import continue_from_last, update_done_steps, get_next_step
 from opendoors.step_base import StepBase, StepInfo
 
-test_logger = MagicMock()
-test_config: ConfigParser = ArchiveConfig(test_logger, "efiction", "opendoors/tests/test_data").config
-test_sql = MagicMock()
-
 
 class Step1(StepBase):
     """Test Step 1"""
@@ -37,8 +33,13 @@ steps = {
     '02': {'info': StepInfo(next_step='None', step_description='Step 2', step_number='02'), 'class': Step2}
 }
 
+test_logger = MagicMock()
+test_config: ConfigParser = ArchiveConfig(test_logger, "test", "opendoors/tests/test_data").config
+test_sql = MagicMock()
+
 
 class TestProgress(TestCase):
+
     def tearDown(self) -> None:
         """ Remove any files generated in test_output """
         filtered = [f for f in glob.glob('opendoors/tests/test_output/*') if not re.match(r'\.keep', f)]
