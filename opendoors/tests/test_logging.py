@@ -1,5 +1,4 @@
 from unittest import TestCase
-from unittest.mock import patch
 
 from opendoors.logging import Logging
 from opendoors.utils import get_full_path

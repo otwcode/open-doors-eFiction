@@ -1,5 +1,3 @@
-from logging import Logger
-
 from configparser import ConfigParser
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
@@ -7,10 +5,6 @@ from unittest.mock import patch, MagicMock
 from opendoors.config import ArchiveConfig
 from opendoors.progress import continue_from_last, update_done_steps, get_next_step
 from opendoors.step_base import StepBase, StepInfo
-
-test_logger = MagicMock()
-test_config: ConfigParser = ArchiveConfig(test_logger, "efiction", "opendoors/tests/test_data").config
-test_sql = MagicMock()
 
 
 class Step1(StepBase):
@@ -34,8 +28,13 @@ steps = {
     '02': {'info': StepInfo(next_step='None', step_description='Step 2', step_number='02'), 'class': Step2}
 }
 
+test_logger = MagicMock()
+test_config: ConfigParser = ArchiveConfig(test_logger, "test", "opendoors/tests/test_data").config
+test_sql = MagicMock()
+
 
 class TestProgress(TestCase):
+
     # This patch responds '2' to every prompt and makes it run all the steps in turn
     @patch('builtins.input', lambda *args: '2')
     def test_continue_from_last(self):

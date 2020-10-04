@@ -5,7 +5,6 @@ from typing import Tuple
 
 import pymysql
 import sqlparse
-from pymysql import Error
 
 from opendoors.utils import get_full_path
 
@@ -14,6 +13,7 @@ class SqlDb:
     """
     Wrapper and helper methods for MySQL commands
     """
+
     def __init__(self, config: ConfigParser, logger: Logger):
         self.config = config
         self.logger = logger
@@ -51,10 +51,9 @@ class SqlDb:
                 stmts = sqlparse.format(f.read(), None, strip_comments=True)
                 raw_statements = sqlparse.split(stmts)
                 for statement in raw_statements:
-                    cursor.execute(statement)
+                    if statement:
+                        cursor.execute(statement)
                 self.conn.commit()
-        except Error as error:
-            self.logger.error(traceback.format_exc())
         finally:
             cursor.close()
 
@@ -81,7 +80,6 @@ class SqlDb:
         current = 0
         total = len(old_table)
         return old_table, current, total
-
 
     def execute_and_fetchall(self, database: str, statement: str):
         """
