@@ -26,4 +26,6 @@ class TestSqlDb(TestCase):
         self.test_sql.dump_database("od_test_sql", get_full_path("opendoors/tests/test_output/test_output.sql"))
         with open(get_full_path("opendoors/tests/test_output/test_output.sql")) as f:
             result = f.readlines()
-            self.assertEqual("(1,'Name1\\'s \\\"stringé\\\"',NULL),\n", result[14])
+        self.assertEqual("(1,'Name1\\'s \\\"stringé\\\"',NULL),\n",
+                         result[14],
+                         "all the SQL statements should be present")

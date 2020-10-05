@@ -8,11 +8,13 @@ from opendoors.utils import make_banner, set_working_dir
 class UtilsTest(TestCase):
     def test_make_banner_with_padding(self):
         banner1 = make_banner('-', "TEXT", 3)
-        self.assertEqual("\n----------\n   TEXT   \n----------", banner1)
+        self.assertEqual("\n----------\n   TEXT   \n----------", banner1,
+                         "text should be padded by the specified number of spaces")
 
     def test_make_banner_with_default_padding(self):
         banner2 = make_banner('-', "TEXT")
-        self.assertEqual("\n--------\n  TEXT  \n--------", banner2)
+        self.assertEqual("\n--------\n  TEXT  \n--------", banner2,
+                         "text should be padded by two spaces when no padding is specified")
 
     @patch('opendoors.utils.os.makedirs')
     def test_set_working_dir_with_path(self, mock_makedirs):
