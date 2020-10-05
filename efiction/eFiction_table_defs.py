@@ -1,3 +1,7 @@
+"""
+eFiction table definitions
+"""
+
 table_definitions = {
     'authors': [
         """\nDROP TABLE IF EXISTS `authors`;""",
