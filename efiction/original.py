@@ -26,7 +26,7 @@ class EFictionOriginal:
         self.edited_file_name = f"{self.code_name}_efiction_original_edited.sql"
 
     @staticmethod
-    def __contains_table_defs(grouped_statements):
+    def _contains_table_defs(grouped_statements):
         """
         Does the provided list of statements contain create table statements?
         :return: True or False
@@ -58,7 +58,7 @@ class EFictionOriginal:
             self.logger.info(f"Created backup of original file at {backup_file}")
         return backup_file
 
-    def __add_table_definitions(self, statements: list):
+    def _add_table_definitions(self, statements: list):
         """
         SQL backups performed from within eFiction don't contain table definitions. Add drop and create table
         statements if this is the case.
@@ -66,7 +66,7 @@ class EFictionOriginal:
         :return: dict of SQL statements grouped by table names
         """
         grouped_statements = group_by_table(statements)
-        if not self.__contains_table_defs(grouped_statements):
+        if not self._contains_table_defs(grouped_statements):
             new_grouped_statements = {}
             for (table_name, statements) in grouped_statements.items():
                 new_grouped_statements[table_name] = create_def(table_name) + statements
@@ -86,10 +86,16 @@ class EFictionOriginal:
         with open(get_full_path(self.config['Processing']['backup_file']), "r") as f:
             original_db_sql = f.read()
         clean_statements = parse_remove_comments(original_db_sql)
-        statements_with_defs = self.__add_table_definitions(clean_statements)
+        statements_with_defs = self._add_table_definitions(clean_statements)
         return add_create_database(self.original_db_name, statements_with_defs)
 
-    def __load_database(self, step_path, statements):
+    def __load_into_database(self, step_path, statements):
+        """
+
+        :param step_path: the destination path for the edited file
+        :param statements: the edited SQL statements
+        :return:
+        """
         self.logger.info("...writing edited SQL statements to a backup file...")
         edited_file_path = os.path.join(step_path, self.edited_file_name)
         self.config['Processing']['original_edited_file'] = edited_file_path
@@ -106,4 +112,4 @@ class EFictionOriginal:
         self.logger.info("Processing original eFiction database...")
         self.__backup_original()
         statements = self.__add_definitions()
-        self.__load_database(step_path, statements)
+        self.__load_into_database(step_path, statements)

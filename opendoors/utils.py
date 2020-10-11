@@ -58,7 +58,8 @@ def make_banner(border_char: chr, banner_text: str, padding=2):
 
 def set_working_dir(path=None, code_name=""):
     """
-    Use provided path or prompt user to accept or change default path
+    Use provided path or prompt user to accept or change default path. Note that output is to console, not log file as
+    the logger isn't initialised until there is a working directory.
     :param path: Optional. The complete path including archive code name to use as a working directory.
     :param code_name: Optional. The short code name for the archive. Ignored if `path` is provided.
     :return: The new working directory.
