@@ -29,8 +29,7 @@ class TestOriginal(TestCase):
     def test_load_original_file(self, mock_add_create_database):
         self.efiction_with_defs.load_original_file("efiction/tests/test_output")
         mock_add_create_database.assert_called_once()
-        test_sql.load_sql_file_into_db.assert_called_once_with(
-            "efiction/tests/test_output/efictiontestnodefs_efiction_original_edited.sql")
+        test_sql.load_sql_file_into_db.arg_should_contain("efictiontestnodefs_efiction_original_edited.sql")
 
     def test_check_for_table_defs_no_defs(self):
         statements = group_by_table(
