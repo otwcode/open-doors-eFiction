@@ -1,5 +1,4 @@
 from unittest import TestCase
-from unittest.mock import patch
 
 from opendoors.logging import Logging
 from opendoors.utils import get_full_path
@@ -9,8 +8,8 @@ class LoggingTest(TestCase):
     def test_logger(self):
         logger = Logging(get_full_path("opendoors/tests/test_output"), "test").logger()
         handlers = logger.handlers
-        self.assertEqual(20, logger.level)
-        self.assertEqual(6, len(handlers))
+        self.assertEqual(20, logger.level, "log level should be INFO")
+        self.assertEqual(6, len(handlers), "there should be 6 handlers in the Logger")
 
         file_handler = [h for h in handlers if h.__class__.__name__ == 'FileHandler'][0]
         formatter1 = file_handler.__dict__['formatter'].__dict__['_fmt']

@@ -2,23 +2,17 @@
 Step 01
 """
 
-from configparser import ConfigParser
-from logging import Logger
-
-from opendoors.mysql import SqlDb
-from opendoors.step_base import StepBase, StepInfo
+from opendoors.step_base import StepBase
 
 
 class Step01(StepBase):
     """
-    Step 01
+    Load original database file into MySQL for future reference
     """
-
-    def __init__(self, config: ConfigParser, logger: Logger, sql: SqlDb, step_info: StepInfo):
-        super().__init__(config, logger, sql, step_info)
 
     def run(self):
         """
         Run step 01
         """
+        self.logger.info("Step 01 in progress")
         return self.finish()

@@ -20,18 +20,22 @@ class TestSqlUtils(TestCase):
 
     def test_extract_table_name_lower_with_underscore_and_backtick(self):
         result = sql_utils.extract_table_name(self.statements[0])
-        self.assertEqual(result, 'thingy_stories')
+        self.assertEqual(result, 'thingy_stories', "the correct table name should be extracted")
 
     def test_extract_table_name_upper_no_underscore_with_backtick(self):
         result = sql_utils.extract_table_name(self.statements[1])
-        self.assertEqual(result, 'fanfictionstories')
+        self.assertEqual(result, 'fanfictionstories',
+                         "the original table name should be returned if it is surrounded by backticks")
 
     def test_extract_table_name_upper_with_underscore_no_backtick(self):
         result = sql_utils.extract_table_name(self.statements[2])
-        self.assertEqual(result, 'fanfiction_stories')
+        self.assertEqual(result, 'fanfiction_stories',
+                         "the original table name should be returned if it is NOT surrounded by backticks")
 
     def test_group_by_table(self):
         result = sql_utils.group_by_table(self.statements)
-        self.assertIsInstance(result, dict)
-        self.assertIsInstance(result['fanfiction_stories'], list)
-        self.assertEqual(3, len(result['thingy_stories']))
+        self.assertIsInstance(result, dict, "group_by_table should return a dict")
+        self.assertIsInstance(result['fanfiction_stories'], list,
+                              "the value of each key should be a list of statements")
+        self.assertEqual(3, len(result['thingy_stories']),
+                         "the value of a key should contain the expected number of statements")

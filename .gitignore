@@ -1,4 +1,6 @@
 .idea/
+test_output/*
+!test_output/.keep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

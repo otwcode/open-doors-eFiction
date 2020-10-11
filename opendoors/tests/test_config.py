@@ -9,6 +9,8 @@ class ConfigTest(TestCase):
     @patch('builtins.input', lambda *args: 'test')
     @patch('builtins.open')
     @patch('opendoors.config.configparser.ConfigParser.write')
-    def test_save(self, mock_write, mock_open):
+    def test_save(self, _mock_write, _mock_open):
         config = ArchiveConfig(Logger("test"), "test", "working_dir")
-        self.assertEqual("test", config.config["Archive"]["code_name"])
+        self.assertEqual("test",
+                         config.config["Archive"]["code_name"],
+                         "code_name config should be set to the provided short code for the archive")
