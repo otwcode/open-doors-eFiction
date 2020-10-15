@@ -2,6 +2,7 @@
 Static utilities for use throughout
 """
 import os
+import shutil
 from os.path import join
 from pathlib import Path
 
@@ -15,6 +16,29 @@ def get_full_path(path):
     :return: The absolute path.
     """
     return join(path) if Path(path).is_absolute() else join(ROOT_DIR, path)
+
+
+def copy_to_dir(old_file_path, new_file_dir, new_file_name):
+    """
+    Copy the source file to the destination path and filename
+    :param old_file_path: The full path to the file to copy.
+    :param new_file_dir: The full path to the destination directory.
+    :param new_file_name: The new name of the file.
+    :return:
+    """
+    Path(new_file_dir).mkdir(parents=True, exist_ok=True)
+    return shutil.copyfile(old_file_path, os.path.join(new_file_dir, new_file_name))
+
+
+def check_if_file_exists(config, section, option):
+    """
+    Check if the specified config option exists and is a valid, existing path
+    :param config: The configuration for the current archive.
+    :param section: The section containing the configuration option. E.g.: "Processing"
+    :param option: The option containing the file path to check. E.g.: "backup_file"
+    :return: True if the specified configuration exists and is a valid path, False if not.
+    """
+    return config.has_option(section, option) and Path(config[section][option]).exists
 
 
 def make_banner(border_char: chr, banner_text: str, padding=2):
@@ -34,7 +58,8 @@ def make_banner(border_char: chr, banner_text: str, padding=2):
 
 def set_working_dir(path=None, code_name=""):
     """
-    Use provided path or prompt user to accept or change default path
+    Use provided path or prompt user to accept or change default path. Note that output is to console, not log file as
+    the logger isn't initialised until there is a working directory.
     :param path: Optional. The complete path including archive code name to use as a working directory.
     :param code_name: Optional. The short code name for the archive. Ignored if `path` is provided.
     :return: The new working directory.
