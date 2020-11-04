@@ -23,8 +23,8 @@ class EFictionSimplified:
         self.config = config
         self.logger = logger
         self.code_name = config['Archive']['code_name']
-        self.edited_db_name = f"{self.code_name}_efiction_original_edited"
-        self.edited_file_name = f"{self.code_name}_efiction_original_edited.sql"
+        self.simplified_db_name = f"{self.code_name}_efiction_original_simplified"
+        self.simplified_file_name = f"{self.code_name}_efiction_original_simplified.sql"
 
     def __is_table_to_keep(self, table_name: str):
         """
@@ -69,13 +69,16 @@ class EFictionSimplified:
         grouped_statements = self._remove_unwanted_tables(statements)
 
         # Flatten grouped SQL statements and add CREATE DATABASE statement
-        output_filename = os.path.join(step_path, f"{self.edited_db_name}.sql")
+        output_filename = os.path.join(step_path, f"{self.simplified_db_name}.sql")
         flattened_statements = [item for sublist in list(grouped_statements.values()) for item in sublist]
-        final_statements = add_create_database(self.edited_db_name, flattened_statements)
+        final_statements = add_create_database(self.simplified_db_name, flattened_statements)
 
         self.logger.info("...writing simplified original tables to file...")
-        self.config['Processing']['simplified_original_db'] = self.edited_db_name
+        self.config['Processing']['simplified_original_db'] = self.simplified_db_name
         step01_working_db = write_statements_to_file(output_filename, final_statements)
+
+        self.logger.info("...removing any existing simplified original database in MySQL...")
+        self.sql.drop_database(self.simplified_db_name)
 
         self.logger.info("...loading simplified original tables into MySQL...")
         self.sql.load_sql_file_into_db(step01_working_db)
@@ -86,7 +89,7 @@ class EFictionSimplified:
         :param step_path: full path to the folder for this step
         :return: True if nothing went wrong
         """
-        self.logger.info("\nProcessing tidied eFiction database...")
+        self.logger.info("\nProcessing edited original eFiction database...")
         with open(get_full_path(self.config['Processing']['original_edited_file']), "r") as f:
             statements = f.read()
         self.__simplify_and_load_statements(parse_remove_comments(statements), step_path)

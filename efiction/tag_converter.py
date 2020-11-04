@@ -14,6 +14,10 @@ class TagConverter:
         self.working_open_doors = self.config['Processing']['open_doors_working_db']
 
     def convert_ratings(self):
+        """
+        Convert the eFiction ratings table to Open Doors tags.
+        :return: Open Doors tags with the original type "rating"
+        """
         old_ratings, current, total = self.sql.read_table_with_total(self.working_original, "ratings")
         for old_rating in old_ratings:
             new_rating = {
@@ -31,6 +35,10 @@ class TagConverter:
                                              "SELECT * FROM tags WHERE `original_type` = 'rating';")
 
     def convert_categories(self):
+        """
+        Convert the eFiction categories table to Open Doors tags.
+        :return: Open Doors tags with the original type "categories"
+        """
         old_categories, current, total = self.sql.read_table_with_total(self.working_original, "categories")
         for old_category in old_categories:
             parent = [cat['category'] for cat in old_categories if cat['catid'] == old_category['parentcatid']]
@@ -51,6 +59,10 @@ class TagConverter:
                                              "SELECT * FROM tags WHERE `original_type` = 'category'")
 
     def convert_classes(self):
+        """
+        Convert the eFiction classes table to Open Doors tags.
+        :return: Open Doors tags with the original type "class"
+        """
         old_classes, current, total = self.sql.read_table_with_total(self.working_original, "classes")
         old_class_types, _, _ = self.sql.read_table_with_total(self.working_original, "classtypes")
         for old_class in old_classes:

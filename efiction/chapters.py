@@ -18,6 +18,7 @@ class EFictionChapters:
         self.logger = logger
         self.working_original = self.config['Processing']['simplified_original_db']
         self.chapters_table = sql.read_table_to_dict(self.config['Processing']['simplified_original_db'], "chapters")
+        self.working_open_doors = self.config['Processing']['open_doors_working_db']
 
     def _are_chapters_in_table(self) -> bool:
         return len([c for c in self.chapters_table if c['storytext']]) > 0
@@ -47,8 +48,10 @@ class EFictionChapters:
         self.logger.info("...loading data from chapters table...")
         old_chapters, current, total = self.sql.read_table_with_total(self.working_original, "chapters")
 
+        self.logger.info("...removing rows from existing chapters table...")
+        self.sql.execute(self.working_open_doors, "TRUNCATE TABLE chapters;")
+
         self.logger.info("...loading text from chapter files...")
-        database = self.config['Processing']['open_doors_working_db']
         for old_chapter in old_chapters:
             chapid = old_chapter['chapid']
             chapter = [chapter_path for chapter_path in chapter_paths if chapter_path['chap_id'] == str(chapid)]
@@ -71,16 +74,19 @@ class EFictionChapters:
                     INSERT INTO chapters (id, position, title, text, story_id, notes) 
                     VALUES (%s, %s, %s, %s, %s, %s);
                 """
-                try:
-                    self.sql.execute(database, query, (chapid, old_chapter['inorder'], old_chapter['title'], text,
-                                                       old_chapter['sid'], old_chapter['notes']))
-                except Exception as e:
-                    warnings.append(f"Error running: {query} -- {e}")
+                self.sql.execute(self.working_open_doors, query,
+                                 (chapid, old_chapter['inorder'], old_chapter['title'], text,
+                                  old_chapter['sid'], old_chapter['notes']))
             current = print_progress(current, total, "chapters converted")
+
+        # If there were any errors, display a warning for the user to check the affected chapters
         if warnings:
             self.logger.warning("\n".join(warnings))
-            self.logger.error(make_banner('-', "There were warnings; check the affected chapters listed above to make sure curly quotes and accented characters are correctly displayed."))
-        return self.sql.execute_and_fetchall(database, "SELECT * FROM chapters;")
+            self.logger.error(
+                make_banner('-',
+                            "There were warnings; check the affected chapters listed above to make sure curly quotes "
+                            "and accented characters are correctly displayed."))
+        return self.sql.execute_and_fetchall(self.working_open_doors, "SELECT * FROM chapters;")
 
     def __list_chapter_files(self):
         """
@@ -95,7 +101,7 @@ class EFictionChapters:
                 chapter_paths.extend([self.__file_with_path(dirpath, subdir, filename) for filename in filenames])
         return chapter_paths
 
-    def load_chapters(self):
+    def load_chapters(self, step_path: str):
         """
         Check if chapters are already present in the database and if not, load them from the filesystem
         :return:
@@ -111,3 +117,7 @@ class EFictionChapters:
             chapter_paths = self.__list_chapter_files()
             self.__load_chapter_text_into_db(chapter_paths)
 
+        database_dump = os.path.join(step_path, f"{self.working_open_doors}.sql")
+        self.logger.info(f"Exporting converted tables to {database_dump}...")
+        self.sql.dump_database(self.working_open_doors, database_dump)
+        return True

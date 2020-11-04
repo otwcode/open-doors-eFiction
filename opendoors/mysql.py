@@ -1,3 +1,4 @@
+import datetime
 from configparser import ConfigParser
 from logging import Logger
 from typing import Tuple
@@ -106,6 +107,11 @@ class SqlDb:
         cursor.execute(statement, params)
         self.conn.commit()
 
+    def drop_database(self, database: str):
+        cursor = self.conn.cursor()
+        cursor.execute(f"DROP DATABASE IF EXISTS {database};")
+        self.conn.commit()
+
     def dump_database(self, database: str, destination_filepath: str):
         """
         Write the contents of an entire database to file.
@@ -122,7 +128,7 @@ class SqlDb:
         cursor.execute("SHOW TABLES")
         tables = []
         for table in cursor.fetchall():
-            tables.append(table['Tables_in_od_test_sql'])
+            tables.append(table[f'Tables_in_{database}'])
 
         for table in tables:
             f.writelines(f"\nDROP TABLE IF EXISTS {database}.`{str(table)}`;\n")
@@ -145,7 +151,7 @@ class SqlDb:
                     f.write(f"INSERT INTO {database}.`{str(table)}` ({column_names}) VALUES \n")
                 field_arr = []
                 for field in row:
-                    if type(row[field]) == str:
+                    if type(row[field]) == str or type(row[field]) == datetime.datetime:
                         field_arr.append(self.conn.escape(row[field]))
                     elif row[field] is None:
                         field_arr.append("NULL")
