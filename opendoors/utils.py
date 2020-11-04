@@ -6,6 +6,10 @@ import shutil
 from os.path import join
 from pathlib import Path
 
+import glob
+
+import re
+
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
@@ -103,3 +107,20 @@ def print_progress(current, total, text="stories"):
         sys.stdout.write("\n")
     sys.stdout.flush()
     return current
+
+
+def remove_output_files(path: str):
+    """
+    Remove all files and folders in a path - mainly useful for test cleanup
+    :param path: the path to tidy up, relative to the root of the project
+    """
+    filtered = [f for f in glob.glob(path) if not re.match(r'\.keep', f)]
+    for file in filtered:
+        try:
+            if Path(file).is_dir():
+                shutil.rmtree(file)
+            else:
+                os.remove(file)
+        except PermissionError as pe:
+            # We don't necessarily care that much
+            continue

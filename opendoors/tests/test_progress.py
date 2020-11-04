@@ -1,15 +1,10 @@
-import glob
-import os
-import re
-import shutil
-from configparser import ConfigParser
-from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
 from opendoors.config import ArchiveConfig
 from opendoors.progress import continue_from_last, update_done_steps, get_next_step
 from opendoors.step_base import StepBase, StepInfo
+from opendoors.utils import remove_output_files
 
 
 class Step1(StepBase):
@@ -40,16 +35,7 @@ test_sql = MagicMock()
 class TestProgress(TestCase):
     def tearDown(self) -> None:
         """ Remove any files generated in test_output """
-        filtered = [f for f in glob.glob('opendoors/tests/test_output/*') if not re.match(r'\.keep', f)]
-        for file in filtered:
-            try:
-                if Path(file).is_dir():
-                    shutil.rmtree(file)
-                else:
-                    os.remove(file)
-            except PermissionError as pe:
-                # We don't necessarily care that much
-                continue
+        remove_output_files('opendoors/tests/test_output/*')
 
     # This patch responds '2' to every prompt and makes it run all the steps in turn
     @patch('builtins.input', lambda *args: '2')

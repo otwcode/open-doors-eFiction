@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 from efiction.original import EFictionOriginal
 from opendoors.config import ArchiveConfig
 from opendoors.sql_utils import group_by_table
+from opendoors.utils import remove_output_files
 
 test_logger = MagicMock()
 test_sql = MagicMock()
@@ -19,10 +20,8 @@ class TestOriginal(TestCase):
     efiction_no_defs = EFictionOriginal(test_config_no_defs, test_logger, test_sql)
 
     def tearDown(self) -> None:
-        """ Remove any files generated in test_output """
-        filtered = [f for f in glob.glob('efiction/tests/test_output/*') if not re.match(r'\.keep', f)]
-        for file in filtered:
-            os.remove(file)
+        """ Remove files created during the tests """
+        remove_output_files('efiction/tests/test_output/*')
 
     @patch('builtins.input', lambda *args: 'efiction/tests/test_data/efiction.sql')
     @patch('efiction.original.add_create_database')
