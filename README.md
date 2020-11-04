@@ -21,10 +21,19 @@ Script to convert eFiction for use in the Open Doors import process
     
     - `python` is the path to your Python 3.7+ interpreter 
     - `CODENAME` is the short name for the archive you're processing
-    - `PATH-TO-WORKING-DIRECTORY` is the root directory where you want the working files to go (a subdirectory named after the CODENAME above will be created in this directory).
+    - `PATH-TO-WORKING-DIRECTORY` is the full path where you want the working files to go (eg: /Users/myusername/otw/thearchivename).
 1. Follow the instructions on screen.
 
-## Development
+## Where to find the original files
+You will need to know the location of the following elements which should be present in the zip file uploaded by the original archivist:
+1. A dump of the original database: this will usually be a file with the .sql extension either in the zip file or in the 
+root of the folder in the backup.
+1. The stories folder: eFiction sites typically keep all the chapter contents in a `stories` folder, where the subfolders
+are author ids, and the filenames the chapter ids. 
+
+It isn't unusual for backups to include the entire hard drive of the original web server, including multiple 
+installations of eFiction; so make sure the folder you find has the same author and chapter ids as the database dump 
+you were given.
 
 ### Tests
 Unit tests are situated in `tests` folders within each package. Fixtures are stored in `test_data`. Some tests output artefacts to a `test_output` folder.

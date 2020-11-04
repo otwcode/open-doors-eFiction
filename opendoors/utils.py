@@ -1,14 +1,15 @@
 """
 Static utilities for use throughout
 """
+import glob
+import html
 import os
+import re
 import shutil
 from os.path import join
 from pathlib import Path
 
-import glob
-
-import re
+import unicodedata
 
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -124,3 +125,12 @@ def remove_output_files(path: str):
         except PermissionError as pe:
             # We don't necessarily care that much
             continue
+
+
+def normalize(text):
+    """
+    Unescape HTML and convert unicode entities into the corresponding character
+    :param text: the text to normalize
+    :return: normalized, unescaped text
+    """
+    return unicodedata.normalize("NFKD", html.unescape(text) or '').strip()
