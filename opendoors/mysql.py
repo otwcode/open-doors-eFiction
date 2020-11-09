@@ -14,7 +14,7 @@ class SqlDb:
     Wrapper and helper methods for MySQL commands
     """
 
-    def __init__(self, config: ConfigParser, logger: Logger):
+    def __init__(self, config: ConfigParser, logger: Logger, ):
         self.config = config
         self.logger = logger
         self.conn = pymysql.connect(**self.get_db_config(), cursorclass=DictCursor)

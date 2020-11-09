@@ -37,4 +37,4 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with pytest - exclude MySQL integration tests
         run: |
-          pytest --ignore-glob "opendoors/tests/test_sql_db.py"
+          pytest --ignore "opendoors/tests/test_sql_db.py" --ignore "efiction/tests/test_metadata.py"

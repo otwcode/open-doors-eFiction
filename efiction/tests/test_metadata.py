@@ -1,6 +1,6 @@
 import datetime
 from unittest import TestCase
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from efiction.metadata import EFictionMetadata
 from efiction.tests.test_utils import load_fixtures
@@ -8,9 +8,10 @@ from opendoors.config import ArchiveConfig
 from opendoors.mysql import SqlDb
 from opendoors.utils import get_full_path, remove_output_files
 
+import sqlite3
+
 test_logger = MagicMock()
 test_config = ArchiveConfig(test_logger, "efiction", "efiction/tests/test_data").config
-# test_sql = MagicMock()
 test_sql = SqlDb(test_config, test_logger)
 
 
