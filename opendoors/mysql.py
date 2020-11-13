@@ -4,6 +4,7 @@ from typing import Tuple
 
 import pymysql
 import sqlparse
+from pymysql.cursors import DictCursor
 
 from opendoors.utils import get_full_path
 
@@ -13,10 +14,10 @@ class SqlDb:
     Wrapper and helper methods for MySQL commands
     """
 
-    def __init__(self, config: ConfigParser, logger: Logger):
+    def __init__(self, config: ConfigParser, logger: Logger, ):
         self.config = config
         self.logger = logger
-        self.conn = pymysql.connect(**self.get_db_config())
+        self.conn = pymysql.connect(**self.get_db_config(), cursorclass=DictCursor)
         self.logger.info(f"Connected to MySQL database server at {self.config['Database']['host']} "
                          f"as {self.config['Database']['user']}")
 
@@ -63,7 +64,7 @@ class SqlDb:
         :param tablename: The name of the table to read.
         :return: The contents of the table as a dict.
         """
-        cursor = self.conn.cursor(dictionary=True, buffered=True)
+        cursor = self.conn.cursor()
         cursor.execute(f"SELECT * FROM {database}.{tablename};")
         return cursor.fetchall()
 
@@ -87,20 +88,20 @@ class SqlDb:
         :param statement: The SQL statement to execute.
         :return: The fetched result of the SQL statement as a dict.
         """
-        cursor = self.conn.cursor(dictionary=True, buffered=True)
+        cursor = self.conn.cursor()
         cursor.execute(f"USE {database}")
         cursor.execute(statement)
         self.conn.commit()
         return cursor.fetchall()
 
-    def execute(self, database: str, statement: str, params: Tuple):
+    def execute(self, database: str, statement: str, params: Tuple=None):
         """
         Execute a statement without fetching the results.
         :param database: The database to run the statement against.
         :param statement: The statement to execute.
         :param params: The parameters to the statement.
         """
-        cursor = self.conn.cursor(dictionary=True, buffered=True)
+        cursor = self.conn.cursor()
         cursor.execute(f"USE {database}")
         cursor.execute(statement, params)
         self.conn.commit()
@@ -121,16 +122,17 @@ class SqlDb:
         cursor.execute("SHOW TABLES")
         tables = []
         for table in cursor.fetchall():
-            tables.append(table[0])
+            tables.append(table['Tables_in_od_test_sql'])
 
         for table in tables:
             f.writelines(f"\nDROP TABLE IF EXISTS {database}.`{str(table)}`;\n")
 
             cursor.execute(f"SHOW CREATE TABLE {database}.`{str(table)}`;")
-            f.writelines([str(cursor.fetchone()[1]), ";\n"])
+            f.writelines([str(cursor.fetchone()['Create Table']), ";\n"])
 
             cursor.execute(f"SHOW COLUMNS FROM {str(table)};")
-            columns = ", ".join([f"`{col[0]}`" for col in cursor.fetchall()])
+            column_definitions = cursor.fetchall()
+            column_names = ", ".join([f"`{definition['Field']}`" for definition in column_definitions])
 
             cursor.execute(f"SELECT * FROM {database}.`{str(table)}`;")
             counter = 0
@@ -140,15 +142,15 @@ class SqlDb:
                     if row_group:
                         f.write(",\n".join(row_group) + ";\n")
                     row_group = []
-                    f.write(f"INSERT INTO {database}.`{str(table)}` ({columns}) VALUES \n")
+                    f.write(f"INSERT INTO {database}.`{str(table)}` ({column_names}) VALUES \n")
                 field_arr = []
                 for field in row:
-                    if type(field) == str:
-                        field_arr.append(self.conn.escape(field))
-                    elif field is None:
+                    if type(row[field]) == str:
+                        field_arr.append(self.conn.escape(row[field]))
+                    elif row[field] is None:
                         field_arr.append("NULL")
                     else:
-                        field_arr.append(str(field))
+                        field_arr.append(str(row[field]))
                 fields = ",".join(field_arr)
                 row_group.append(f"({fields})")
                 counter = counter + 1
