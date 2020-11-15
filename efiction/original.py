@@ -22,7 +22,7 @@ class EFictionOriginal:
         self.config = config
         self.logger = logger
         self.code_name = config['Archive']['code_name']
-        self.original_db_name = f"{self.code_name}_efiction_original"
+        self.edited_db_name = f"{self.code_name}_efiction_original"
         self.edited_file_name = f"{self.code_name}_efiction_original_edited.sql"
 
     @staticmethod
@@ -87,7 +87,7 @@ class EFictionOriginal:
             original_db_sql = f.read()
         clean_statements = parse_remove_comments(original_db_sql)
         statements_with_defs = self._add_table_definitions(clean_statements)
-        return add_create_database(self.original_db_name, statements_with_defs)
+        return add_create_database(self.edited_db_name, statements_with_defs)
 
     def __load_into_database(self, step_path, statements):
         """
@@ -100,6 +100,9 @@ class EFictionOriginal:
         edited_file_path = os.path.join(step_path, self.edited_file_name)
         self.config['Processing']['original_edited_file'] = edited_file_path
         edited_file = write_statements_to_file(self.config['Processing']['original_edited_file'], statements)
+
+        self.logger.info("...removing any existing edited original database in MySQL...")
+        self.sql.drop_database(self.edited_db_name)
 
         self.logger.info("...loading edited original database into MySQL...")
         self.sql.load_sql_file_into_db(edited_file)

@@ -8,8 +8,6 @@ from opendoors.config import ArchiveConfig
 from opendoors.mysql import SqlDb
 from opendoors.utils import get_full_path, remove_output_files
 
-import sqlite3
-
 test_logger = MagicMock()
 test_config = ArchiveConfig(test_logger, "efiction", "efiction/tests/test_data").config
 test_sql = SqlDb(test_config, test_logger)
@@ -19,12 +17,12 @@ class TestEFictionConverter(TestCase):
     converter_config = test_config
     converter_config['Processing']['working_dir'] = get_full_path("efiction/tests/test_output")
 
-    efiction_converter = EFictionMetadata(converter_config, test_logger, test_sql)
+    efiction_converter = EFictionMetadata(converter_config, test_logger, test_sql, "test_path")
 
     def setUp(self) -> None:
         """ Load test data and create the Open Doors tables """
         load_fixtures(test_config, test_sql)
-        self.efiction_converter.create_open_doors_db()
+        self.efiction_converter.create_open_doors_db("test_path")
 
     def tearDown(self) -> None:
         """ Remove files created during the tests """
