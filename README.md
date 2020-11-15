@@ -6,6 +6,14 @@ Script to convert eFiction for use in the Open Doors import process
 1. Python 3.7+
 1. MySQL 5.7
 
+## Before you start
+Make sure you have the following:
+1. The backup of the archive including the SQL backup file and `stories` folder (see [Where to find the original files](#Where-to-find-the-original-files) below). 
+If they are compressed, for example in a zip file, they need to be decompressed into their own folder.
+1. A short "code name" for the archive with no underscores, spaces or punctuation. This will be used throughout the code to prefix the MySQL databases and name intermediate files. Any short, distinctive name or acronym will do. 
+For example, if the archive is called "My Awesome Archive of Fandom Awesomeness", you might use a code name like `maafa` or `awesome` - archives often already have a nickname and if so, use that.
+
+
 ## Quickstart
 
 1. Ensure you are using Python 3
@@ -14,7 +22,6 @@ Script to convert eFiction for use in the Open Doors import process
     ```bash
     pip install -r requirements.txt
     ```
-1. Download the archive backup and find the SQL backup file and `stories` folder (see [Where to find the original files](#Where-to-find-the-original-files) below)
 1. Run 
    ```bash
    python start.py CODENAME PATH-TO-WORKING-DIRECTORY
@@ -22,17 +29,17 @@ Script to convert eFiction for use in the Open Doors import process
     where:
     
     - `python` is the path to your Python 3.7+ interpreter 
-    - `CODENAME` is the short name for the archive you're processing
-    - `PATH-TO-WORKING-DIRECTORY` is the full path where you want the working files to go (eg: /Users/myusername/otw/thearchivename). Working files will include multiple backups of the various steps in this process.
+    - `CODENAME` is the short name for the archive you're processing with no underscores, spaces or punctuation
+    - `PATH-TO-WORKING-DIRECTORY` is the absolute path where you want the working files to go (eg: /Users/myusername/otw/thearchivename). Working files will include multiple backups of the various steps in this process.
 1. Follow the instructions on screen.
 
 Note that the process will create databases and tables in MySQL as well as files in the designated folder. All the databases will be prefixed with CODENAME.
 
 ## Where to find the original files
-You will need to know the location of the following elements. They should be present in the zip file uploaded by the original archivist:
-1. A dump of the original database: this will usually be a file with the .sql extension either in the zip file or in the 
+You will need to know the location of the following elements. They should be present in the zip file uploaded by the original archivist; decompress the zip and make sure you have the paths:
+1. A **dump of the original database**: this will usually be a file with the .sql extension either in the zip file or in the 
 root of the folder in the backup.
-1. The stories folder: eFiction sites typically keep all the chapter contents in a `stories` folder, where the subfolders
+1. The **stories** folder: eFiction sites typically keep all the chapter contents in a `stories` folder, where the subfolders
 are author ids, and the filenames the chapter ids. 
 
 It isn't unusual for backups to include the entire hard drive of the original web server, including multiple 
