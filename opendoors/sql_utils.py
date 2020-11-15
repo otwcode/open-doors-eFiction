@@ -56,6 +56,8 @@ def write_statements_to_file(filepath: str, statements: list) -> str:
 
     with open(filepath, 'w') as file:
         for statement in statements:
+            if statement.startswith('DROP TABLE'):
+                file.write('\n')
             file.write(statement + "\n")
     return filepath
 
@@ -68,7 +70,8 @@ def parse_remove_comments(original_db_sql: str):
     """
     stmts = sqlparse.format(original_db_sql, None, strip_comments=True)
     raw_statements = sqlparse.split(stmts)
-    return [clean_up_sql_statement(item) for item in raw_statements if item not in [';', '#']]
+    cleaned_statements = [clean_up_sql_statement(item) for item in raw_statements if item not in [';', '#']]
+    return [statement for statement in cleaned_statements if statement.strip()]
 
 
 def remove_invalid_date_default(statement: str) -> str:
@@ -81,13 +84,14 @@ def remove_invalid_date_default(statement: str) -> str:
                   flags=re.IGNORECASE)
 
 
-def remove_database_statements(statement: str) -> str:
+def remove_unwanted_statements(statement: str) -> str:
     """
-    Remove database creation and use statements so we can replace them with new ones
+    Remove database creation and use statements so we can replace them with new ones, and remove other miscellaneous
+    statements we don't need.
     :param statement: SQL statement to modify
     :return: an empty string if this was a CREATE or USE DATABASE statement or the original statement if not
     """
-    if statement.lower().startswith('create database ') or statement.lower().startswith('use '):
+    if statement.lower().startswith(('create database ', 'use ', 'lock ', 'unlock ')):
         return ''
     else:
         return statement
@@ -99,4 +103,4 @@ def clean_up_sql_statement(statement: str) -> str:
     :param statement: original statement to modify
     :return: modified statement
     """
-    return remove_database_statements(remove_invalid_date_default(statement))
+    return remove_unwanted_statements(remove_invalid_date_default(statement))
