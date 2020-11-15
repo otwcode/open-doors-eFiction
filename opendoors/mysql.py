@@ -120,7 +120,7 @@ class SqlDb:
         :return: The full path to the written file.
         """
         cursor = self.conn.cursor()
-        f = open(get_full_path(destination_filepath), "w")
+        f = open(get_full_path(destination_filepath), "w", encoding="UTF-8")
         f.write(f"DROP DATABASE IF EXISTS {database};\n")
         f.write(f"CREATE DATABASE {database};\n")
         f.write(f"USE {database};\n\n")
