@@ -30,7 +30,6 @@ class TestStep02(TestCase):
                 # We don't necessarily care that much
                 continue
 
-    # @patch('builtins.input', lambda *args: 'efiction/tests/test_data/efiction.sql')
     def test_run(self):
         step_info = StepInfo("test_output/02", "Test step 02", "03")
         thing = Step02(test_config, test_logger, test_sql, step_info).run()

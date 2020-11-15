@@ -87,7 +87,7 @@ class EFictionSimplified:
         :return: True if nothing went wrong
         """
         self.logger.info("\nProcessing tidied eFiction database...")
-        with open(get_full_path(self.config['Processing']['original_tidied_file']), "r") as f:
+        with open(get_full_path(self.config['Processing']['original_edited_file']), "r") as f:
             statements = f.read()
         self.__simplify_and_load_statements(parse_remove_comments(statements), step_path)
 

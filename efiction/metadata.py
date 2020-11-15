@@ -1,16 +1,14 @@
-import html
 import os
 import re
 from configparser import ConfigParser
 from logging import Logger
 
-import unicodedata
 from unidecode import unidecode
 
 from efiction.tag_converter import TagConverter
 from opendoors.mysql import SqlDb
 from opendoors.sql_utils import parse_remove_comments, write_statements_to_file, add_create_database
-from opendoors.utils import print_progress, get_full_path
+from opendoors.utils import print_progress, get_full_path, normalize
 
 
 class EFictionMetadata:
@@ -43,14 +41,6 @@ class EFictionMetadata:
                                              statements)
         self.sql.load_sql_file_into_db(od_tables)
         return True
-
-    def normalize(self, text):
-        """
-        Unescape HTML and convert unicode entities into the corresponding character
-        :param text: the text to normalize
-        :return: normalized, unescaped text
-        """
-        return unicodedata.normalize("NFKD", html.unescape(text) or '').strip()
 
     @staticmethod
     def generate_email(name: str, email: str, archive_long_name: str):
@@ -142,7 +132,7 @@ class EFictionMetadata:
             new_story = {
                 'id': old_story['sid'],
                 'title': (old_story['title'] or '').strip(),
-                'summary': self.normalize(old_story['summary']),
+                'summary': normalize(old_story['summary']),
                 'notes': (old_story['storynotes'] or '').strip(),
                 'date': str(old_story['date']),
                 'updated': str(old_story['updated']),
