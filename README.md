@@ -10,7 +10,7 @@ Script to convert eFiction for use in the Open Doors import process
 Make sure you have the following:
 1. The backup of the archive including the SQL backup file and `stories` folder (see [Where to find the original files](#Where-to-find-the-original-files) below). 
 If they are compressed, for example in a zip file, they need to be decompressed into their own folder.
-1. A short "code name" for the archive with no underscores, spaces or punctuation. This will be used throughout the code to prefix the MySQL databases and name intermediate files. Any short, distinctive name or acronym will do. 
+1. A short "code name" for the archive with no underscores, spaces or punctuation. This will be used throughout the code to prefix the MySQL databases and name intermediate files. Any short, distinctive name or acronym will do. Please use all lowercase characters for the codename, as Windows machines will automatically convert to lowercase when creating MySQL tables.
 For example, if the archive is called "My Awesome Archive of Fandom Awesomeness", you might use a code name like `maafa` or `awesome` - archives often already have a nickname and if so, use that.
 
 
