@@ -134,7 +134,7 @@ class EFictionMetadata:
                      {new_story['id'], "story", author_id}"""
         self.sql.execute(self.working_open_doors, full_query)
 
-    def convert_stories(self):
+    def convert_stories(self, language_code):
         """
         Convert eFiction stories to the Open Doors format.
         :return: The Open Doors stories table as a dict.
@@ -149,13 +149,14 @@ class EFictionMetadata:
                 'notes': (old_story['storynotes'] or '').strip(),
                 'date': str(old_story['date']),
                 'updated': str(old_story['updated']),
+                'language_code': language_code
             }
 
             self.logger.debug(f"Converting story metadata for '{new_story['title']}'")
             query = f"""
-            INSERT INTO stories (id, title, summary, notes, date, updated)
+            INSERT INTO stories (id, title, summary, notes, date, updated, language_code)
             VALUES {new_story['id'], new_story['title'], new_story['summary'],
-                    new_story['notes'], new_story['date'], new_story['updated']};
+                    new_story['notes'], new_story['date'], new_story['updated'], new_story['language_code']};
             """
             self.sql.execute(self.working_open_doors, query)
 
@@ -198,7 +199,14 @@ class EFictionMetadata:
         old_authors = self.sql.read_table_to_dict(self.working_original, "authors")
         self.authors = self._convert_authors(old_authors)
 
-        self.convert_stories()
+        # Prompt for original db file if we don't already have it in the config
+        if not self.config.has_option('Archive', 'language_code'):
+            language = input("Two-letter Language code of the stories in this archive (default: en - press enter):\n>> ")
+            self.config['Archive']['language_code'] = language
+        else:
+            language = self.config['Archive']['language_code']
+
+        self.convert_stories(language)
 
         database_dump = os.path.join(step_path, f"{self.working_open_doors}_without_chapters.sql")
         self.logger.info(f"Exporting converted tables to {database_dump}...")

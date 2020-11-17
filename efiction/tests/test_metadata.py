@@ -147,7 +147,7 @@ class TestEFictionConverter(TestCase):
 
     def test_convert_stories(self):
         self.efiction_converter.convert_all_tags()
-        result = self.efiction_converter.convert_stories()
+        result = self.efiction_converter.convert_stories('de')
         self.assertEqual(15, len(result))
         self.assertEqual(
             {'ao3_url': None,
@@ -165,6 +165,7 @@ class TestEFictionConverter(TestCase):
              'tags': '',
              'title': 'Bacon ipsum',
              'updated': datetime.datetime(2006, 2, 9, 22, 21, 35),
+             'language_code': 'de',
              'url': None,
              'warnings': ''}, result[0], "Entities should be unencoded and leading and trailing spaces stripped")
         self.assertEqual(
@@ -183,6 +184,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Lorem ipsum',
               'updated': datetime.datetime(2006, 3, 4, 13, 0, 45),
+              'language_code': 'de',
               'url': None,
               'warnings': ''},
              {'ao3_url': None,
@@ -200,6 +202,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Email story',
               'updated': datetime.datetime(2006, 3, 4, 13, 16, 12),
+              'language_code': 'de',
               'url': None,
               'warnings': ''},
              {'ao3_url': None,
@@ -217,6 +220,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Cat-related ipsum',
               'updated': datetime.datetime(2006, 3, 5, 17, 12, 16),
+              'language_code': 'de',
               'url': None,
               'warnings': ''}], result[1:4])
         self.assertEqual(
@@ -239,6 +243,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Cupcake ipsum',
               'updated': datetime.datetime(2006, 3, 5, 17, 20, 38),
+              'language_code': 'de',
               'url': None,
               'warnings': ''},
              {'ao3_url': None,
@@ -256,6 +261,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Windows 1252 Story',
               'updated': datetime.datetime(2006, 3, 18, 12, 56, 43),
+              'language_code': 'de',
               'url': None,
               'warnings': ''}], [result[4], result[8]], "Unicode characters should be normalized")
         self.assertEqual(
@@ -274,6 +280,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Carl Sagan ipsum',
               'updated': datetime.datetime(2006, 3, 5, 17, 27, 5),
+              'language_code': 'de',
               'url': None,
               'warnings': ''},
              {'ao3_url': None,
@@ -291,6 +298,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'A lot of cakes',
               'updated': datetime.datetime(2006, 3, 6, 15, 42, 57),
+              'language_code': 'de',
               'url': None,
               'warnings': ''},
              {'ao3_url': None,
@@ -308,6 +316,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Actually a bookmark',
               'updated': datetime.datetime(2006, 3, 17, 15, 26, 36),
+              'language_code': 'de',
               'url': None,
               'warnings': ''}], result[5:8])
         self.assertEqual(
@@ -326,6 +335,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Another story in series',
               'updated': datetime.datetime(2006, 3, 18, 13, 42, 27),
+              'language_code': 'de',
               'url': None,
               'warnings': ''},
              {'ao3_url': None,
@@ -345,6 +355,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Beans and other vegetables',
               'updated': datetime.datetime(2008, 2, 11, 13, 33, 2),
+              'language_code': 'de',
               'url': None,
               'warnings': ''},
              {'ao3_url': None,
@@ -362,6 +373,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Japanese',
               'updated': datetime.datetime(2008, 10, 8, 20, 58, 29),
+              'language_code': 'de',
               'url': None,
               'warnings': ''},
              {'ao3_url': None,
@@ -379,6 +391,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Accented lorem ipsum',
               'updated': datetime.datetime(2008, 11, 28, 14, 10, 59),
+              'language_code': 'de',
               'url': None,
               'warnings': ''},
              {'ao3_url': None,
@@ -396,6 +409,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Zombies',
               'updated': datetime.datetime(2008, 12, 27, 7, 18, 9),
+              'language_code': 'de',
               'url': None,
               'warnings': ''},
              {'ao3_url': None,
@@ -414,6 +428,7 @@ class TestEFictionConverter(TestCase):
               'tags': '',
               'title': 'Hipster ipsum',
               'updated': datetime.datetime(2010, 1, 3, 10, 4, 16),
+              'language_code': 'de',
               'url': None,
               'warnings': ''}],
             result[9:])
