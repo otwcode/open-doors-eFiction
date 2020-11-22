@@ -35,6 +35,55 @@ For example, if the archive is called "My Awesome Archive of Fandom Awesomeness"
 
 Note that the process will create databases and tables in MySQL as well as files in the designated folder. All the databases will be prefixed with CODENAME.
 
+
+## Process
+
+1. Run 
+   ```bash
+   python start.py CODENAME PATH-TO-WORKING-DIRECTORY
+   ``` 
+    where:
+    
+    - `python` is the path to your Python 3.7+ interpreter 
+    - `CODENAME` is the short name for the archive you're processing with no underscores, spaces or punctuation
+    - `PATH-TO-WORKING-DIRECTORY` is the absolute path where you want the working files to go (eg: /Users/myusername/otw/thearchivename). Working files will include multiple backups of the various steps in this process.
+
+2. Enter the full (original) name for the archive eg TER/MA, Land of Dreams
+3. Enter your MySQL hostname
+4. Enter your MySQL user name
+5. Enter your MySQL password
+6. Enter the full path to the database file, (eg /Users/myusername/myusername/otw/thearchivename/archivefile.sql)
+7. Follow the prompts to run steps 1-4
+
+### High-level overview of each step
+- Start
+- Step 01 Make a backup of original database
+- Step 02 Create simplified database  
+- Step 03 Convert metadata to Open Doors tables     
+- Step 04 Convert chapters
+
+
+### Step 01 - Make a backup of original database
+
+This step creates a backup of the original database (in main directory), and then creates and tidies an edited version which is added to a new directory, 01, and loaded into mysql. 
+
+### Step 02 -  Create simplified efiction database  
+
+This step removes unused tables to create a simplified of the edited database created in step 01, adds it to a new directory, 02 and loads it into MySQL
+
+### Step 03 - Convert eFiction to Open Doors
+
+This step converts the efiction tables into a database using the Open Doors structure and adds it to a new directory 03.
+
+### Step 04 - Convert chapters
+
+This step adds the chapters from the specified location (eg /Users/myusername/myusername/otw/thearchivename/fiction/stories) into the chapters table of a new database in new directory 04, and loads it into MySQL.
+
+
+##  Next steps
+Run https://github.com/otwcode/open-doors-code from step 02
+
+
 ## Where to find the original files
 You will need to know the location of the following elements. They should be present in the zip file uploaded by the original archivist; decompress the zip and make sure you have the paths:
 1. A **dump of the original database**: this will usually be a file with the .sql extension either in the zip file or in the 
