@@ -164,6 +164,7 @@ CREATE TABLE IF NOT EXISTS `tags`
     `ao3_tag_type`         varchar(255)  DEFAULT NULL,
     `ao3_tag_category`     varchar(255)  DEFAULT NULL,
     `ao3_tag_fandom`       varchar(255)  DEFAULT NULL,
+	`storyid`			   int(11)		 DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE = InnoDB
