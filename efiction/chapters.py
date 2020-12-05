@@ -58,7 +58,7 @@ class EFictionChapters:
             if chapter:
                 file = chapter[0]['path']
                 try:
-                    with open(file, 'r') as f:
+                    with open(file, 'r', encoding="utf-8") as f:
                         raw = f.read()
                 except UnicodeDecodeError as err:
                     warnings.append(f"Chapter with id {chapid} contains non-ASCII characters which are not valid "

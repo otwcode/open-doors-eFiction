@@ -54,7 +54,7 @@ def write_statements_to_file(filepath: str, statements: list) -> str:
     if not os.path.exists(os.path.dirname(filepath)):
         os.makedirs(os.path.dirname(filepath))
 
-    with open(filepath, 'w') as file:
+    with open(filepath, 'w', encoding="utf-8") as file:
         for statement in statements:
             if statement.startswith('DROP TABLE'):
                 file.write('\n')
