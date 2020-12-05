@@ -48,7 +48,7 @@ class SqlDb:
         """
         cursor = self.conn.cursor()
         try:
-            with open(sql_path, "r") as f:
+            with open(sql_path, "r", encoding="utf-8") as f:
                 stmts = sqlparse.format(f.read(), None, strip_comments=True)
                 raw_statements = sqlparse.split(stmts)
                 for statement in raw_statements:

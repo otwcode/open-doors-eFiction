@@ -83,7 +83,7 @@ class EFictionOriginal:
         self.logger.info("\nAdding table definitions and removing comments from original eFiction database")
 
         self.logger.info("...adding table definitions and tidying original db dump...")
-        with open(get_full_path(self.config['Processing']['backup_file']), "r") as f:
+        with open(get_full_path(self.config['Processing']['backup_file']), "r", encoding="utf-8") as f:
             original_db_sql = f.read()
         clean_statements = parse_remove_comments(original_db_sql)
         statements_with_defs = self._add_table_definitions(clean_statements)
