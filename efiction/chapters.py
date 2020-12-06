@@ -63,8 +63,14 @@ class EFictionChapters:
                 except UnicodeDecodeError as err:
                     warnings.append(f"Chapter with id {chapid} contains non-ASCII characters which are not valid "
                                     f"UTF-8. Trying Windows 1252...")
-                    with open(file, 'r', encoding='cp1252') as f:
-                        raw = f.read()
+                    try:
+                        with open(file, 'r', encoding='cp1252') as f:
+                            raw = f.read()
+                    except UnicodeDecodeError as err:
+                        warnings.append(f"Chapter with id {chapid} contains non-ASCII characters which are not valid "
+                                        f"Windows 1252. Trying Latin 1...")
+                        with open(file, 'r', encoding='latin-1') as f:
+                            raw = f.read()
 
                 text = normalize(raw)
                 if old_chapter['endnotes']:
