@@ -73,7 +73,7 @@ This step removes unused tables to create a simplified version of the edited dat
 
 ### Step 03 - Convert eFiction to Open Doors
 
-This step converts the efiction tables into a database using the Open Doors structure and adds it to a new directory 03.
+This step converts the efiction tables into a new database using the Open Doors structure, and creates a backup of the new tables to a new directory 03.
 
 ### Step 04 - Convert chapters
 
