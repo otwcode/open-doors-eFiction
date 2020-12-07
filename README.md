@@ -77,7 +77,7 @@ This step converts the efiction tables into a new database using the Open Doors 
 
 ### Step 04 - Convert chapters
 
-This step adds the chapters from the specified location (eg /Users/myusername/myusername/otw/thearchivename/fiction/stories) into the chapters table of a new database in new directory 04, and loads it into MySQL.
+This step copies the chapters from the specified location (eg /Users/myusername/Downloads/thearchivename/fiction/stories) into the chapters table of the Open Doors database created in step 03, and creates a backup in folder 04.
 
 
 ##  Next steps
