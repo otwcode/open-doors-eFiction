@@ -69,7 +69,7 @@ This step creates a backup of the original database (in main directory), and the
 
 ### Step 02 -  Create simplified efiction database  
 
-This step removes unused tables to create a simplified of the edited database created in step 01, adds it to a new directory, 02 and loads it into MySQL
+This step removes unused tables to create a simplified version of the edited database created in step 01, adds it to a new directory, 02, and loads it into MySQL
 
 ### Step 03 - Convert eFiction to Open Doors
 
