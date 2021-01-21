@@ -161,14 +161,16 @@ class EFictionMetadata:
                 'notes': key_find('storynotes', old_story, '').strip(),
                 'date': str(old_story['date']),
                 'updated': str(old_story['updated']),
-                'language_code': language_code
+                'language_code': language_code,
+                'rating': old_story['rating']
             }
 
             self.logger.debug(f"Converting story metadata for '{new_story['title']}'")
             query = f"""
-            INSERT INTO stories (id, title, summary, notes, date, updated, language_code)
+            INSERT INTO stories (id, title, summary, notes, date, updated, language_code, rating)
             VALUES {new_story['id'], new_story['title'], new_story['summary'],
-                    new_story['notes'], new_story['date'], new_story['updated'], new_story['language_code']};
+                    new_story['notes'], new_story['date'], new_story['updated'], new_story['language_code'],
+                    new_story['rating']};
             """
             self.sql.execute(self.working_open_doors, query)
 

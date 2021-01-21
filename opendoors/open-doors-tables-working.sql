@@ -114,6 +114,7 @@ CREATE TABLE IF NOT EXISTS `stories`
     `do_not_import` tinyint(1)   NOT NULL DEFAULT '0',
     `ao3_url`       varchar(255)          DEFAULT NULL,
     `import_notes`  varchar(1024)         DEFAULT '',
+    `rating` 		tinyint(4)	 NOT NULL DEFAULT 0,
     PRIMARY KEY (`id`),
     UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE = InnoDB
