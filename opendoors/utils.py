@@ -6,13 +6,10 @@ import html
 import os
 import re
 import shutil
-from os.path import join
+import sys
 from pathlib import Path
 
 import unicodedata
-
-ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
-
 
 def get_full_path(path):
     """
@@ -20,7 +17,8 @@ def get_full_path(path):
     :param path: A relative path fragment. If this is already the absolute path, just return it.
     :return: The absolute path.
     """
-    return join(path) if Path(path).is_absolute() else join(ROOT_DIR, path)
+    full_path: Path = Path(path).resolve(strict=False)
+    return str(full_path)
 
 
 def copy_to_dir(old_file_path, new_file_dir, new_file_name):
