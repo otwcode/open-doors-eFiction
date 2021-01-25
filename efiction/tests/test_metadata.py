@@ -171,6 +171,7 @@ class TestEFictionConverter(TestCase):
              'import_notes': '',
              'imported': 0,
              'notes': '',
+             'rating': None,
              'relationships': '',
              'summary': '<p>  </p>Meat-related text.',
              'tags': '',
