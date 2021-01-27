@@ -54,13 +54,10 @@ def key_find(needle: object, haystack: Mapping[object, object], none_val: object
     :return The value if the key is in the haystack, or none_val if not
     """
 
-    if needle in haystack:
-        value = haystack[needle]
-
     # On occasion, we may get literal None's returned for a value instead of the
     # key being missing.  Make sure to treat those as failures.
-    if value is not None:
-        return value
+    if needle in haystack and haystack[needle] is not None:
+        return haystack[needle]
     return none_val
 
 def make_banner(border_char: chr, banner_text: str, padding=2):
