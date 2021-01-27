@@ -8,7 +8,7 @@ from unidecode import unidecode
 from efiction.tag_converter import TagConverter
 from opendoors.mysql import SqlDb
 from opendoors.sql_utils import parse_remove_comments, write_statements_to_file, add_create_database
-from opendoors.utils import print_progress, get_full_path, normalize
+from opendoors.utils import print_progress, get_full_path, normalize, key_find
 
 
 class EFictionMetadata:
@@ -103,10 +103,10 @@ class EFictionMetadata:
 
     def _convert_story_tags(self, old_story):
         old_tags = {
-            'rating': old_story['rid'].split(','),
-            'categories': old_story['catid'].split(','),
-            'classes': old_story['classes'].split(','),
-            'characters': old_story['charid'].split(',')
+            'rating': key_find('rid', old_story, '').split(','),
+            'categories': key_find('catid', old_story, '').split(','),
+            'classes': key_find('classes', old_story, '').split(','),
+            'characters': key_find('charid', old_story, '').split(',')
         }
         ratings = [r['id'] for r in self.ratings if str(r['original_tagid']) in old_tags['rating']]
         categories = [c['id'] for c in self.categories if str(c['original_tagid']) in old_tags['categories']]
@@ -144,9 +144,9 @@ class EFictionMetadata:
         for old_story in old_stories:
             new_story = {
                 'id': old_story['sid'],
-                'title': (old_story['title'] or '').strip(),
+                'title': key_find('title', old_story, '').strip(),
                 'summary': normalize(old_story['summary']),
-                'notes': (old_story['storynotes'] or '').strip(),
+                'notes': key_find('storynotes', old_story, '').strip(),
                 'date': str(old_story['date']),
                 'updated': str(old_story['updated']),
                 'language_code': language_code
@@ -167,7 +167,7 @@ class EFictionMetadata:
             self.logger.debug(f"  authors...")
             self._convert_author_join(new_story, old_story['uid'])
             coauthors = []
-            if old_story['coauthors'] is not None and old_story['coauthors'] != "":
+            if key_find('coauthors', old_story):
                 for authorid in old_story['coauthors'].split(","):
                     coauthors.append(authorid.strip())
             for coauthor in coauthors:

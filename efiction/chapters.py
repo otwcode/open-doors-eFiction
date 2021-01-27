@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List
 
 from opendoors.mysql import SqlDb
-from opendoors.utils import get_full_path, normalize, print_progress, make_banner
+from opendoors.utils import get_full_path, normalize, print_progress, make_banner, key_find
 
 
 class EFictionChapters:
@@ -73,7 +73,7 @@ class EFictionChapters:
                             raw = f.read()
 
                 text = normalize(raw)
-                if old_chapter['endnotes']:
+                if key_find('endnotes', old_chapter):
                     text = text + f"\n\n\n<hr>\n{old_chapter['endnotes']}"
 
                 query = """
