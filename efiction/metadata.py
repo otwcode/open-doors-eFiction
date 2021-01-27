@@ -103,10 +103,10 @@ class EFictionMetadata:
 
     def _convert_story_tags(self, old_story):
         old_tags = {
-            'rating': old_story['rid'].split(','),
-            'categories': old_story['catid'].split(','),
-            'classes': old_story['classes'].split(','),
-            'characters': old_story['charid'].split(',')
+            'rating': key_find('rid', old_story, '').split(','),
+            'categories': key_find('catid', old_story, '').split(','),
+            'classes': key_find('classes', old_story, '').split(','),
+            'characters': key_find('charid', old_story, '').split(',')
         }
         ratings = [r['id'] for r in self.ratings if str(r['original_tagid']) in old_tags['rating']]
         categories = [c['id'] for c in self.categories if str(c['original_tagid']) in old_tags['categories']]
