@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import sys
+from typing import Mapping
 from pathlib import Path
 
 import unicodedata
@@ -43,6 +44,24 @@ def check_if_file_exists(config, section, option):
     """
     return config.has_option(section, option) and Path(config[section][option]).exists
 
+def key_find(needle: object, haystack: Mapping[object, object], none_val: object = None) -> object:
+    """
+    Helper function to search a Dict (or any Mappable type) for a key, returning
+    the value if it exists. This avoids KeyErrors when it is not certain if the key
+    exists in the array or not.
+    :param needle: The key to return, if it exists
+    :param haystack: The Dict/Mappable to search
+    :return The value if the key is in the haystack, or none_val if not
+    """
+
+    if needle in haystack:
+        value = haystack[needle]
+
+    # On occasion, we may get literal None's returned for a value instead of the
+    # key being missing.  Make sure to treat those as failures.
+    if value is not None:
+        return value
+    return none_val
 
 def make_banner(border_char: chr, banner_text: str, padding=2):
     """

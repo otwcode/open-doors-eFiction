@@ -8,7 +8,7 @@ from unidecode import unidecode
 from efiction.tag_converter import TagConverter
 from opendoors.mysql import SqlDb
 from opendoors.sql_utils import parse_remove_comments, write_statements_to_file, add_create_database
-from opendoors.utils import print_progress, get_full_path, normalize
+from opendoors.utils import print_progress, get_full_path, normalize, key_find
 
 
 class EFictionMetadata:
@@ -144,9 +144,9 @@ class EFictionMetadata:
         for old_story in old_stories:
             new_story = {
                 'id': old_story['sid'],
-                'title': (old_story['title'] or '').strip(),
+                'title': key_find('title', old_story, '').strip(),
                 'summary': normalize(old_story['summary']),
-                'notes': (old_story['storynotes'] or '').strip(),
+                'notes': key_find('storynotes', old_story, '').strip(),
                 'date': str(old_story['date']),
                 'updated': str(old_story['updated']),
                 'language_code': language_code
@@ -167,7 +167,7 @@ class EFictionMetadata:
             self.logger.debug(f"  authors...")
             self._convert_author_join(new_story, old_story['uid'])
             coauthors = []
-            if old_story['coauthors'] is not None and old_story['coauthors'] != "":
+            if key_find('coauthors', old_story):
                 for authorid in old_story['coauthors'].split(","):
                     coauthors.append(authorid.strip())
             for coauthor in coauthors:
