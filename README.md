@@ -81,7 +81,7 @@ This step copies the chapters from the specified location (eg /Users/myusername/
 
 
 ##  Next steps
-Run https://github.com/otwcode/open-doors-code from step 02
+Run https://github.com/otwcode/open-doors-code from step 03
 
 
 ## Where to find the original files
