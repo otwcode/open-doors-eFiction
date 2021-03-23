@@ -37,7 +37,7 @@ class TestEFictionConverter(TestCase):
     def test_for_coauthor_existing(self):
         # Assert list > 0
         fake_story = {"id" : 1}
-        assert self.efiction_converter.fetch_coauthors(fake_story)
+        self.assertEqual(1, self.efiction_converter.fetch_coauthors(fake_story))
 
     def test_convert_authors(self):
         old_authors = [
