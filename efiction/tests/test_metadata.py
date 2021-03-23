@@ -28,6 +28,17 @@ class TestEFictionConverter(TestCase):
         """ Remove files created during the tests """
         remove_output_files('efiction/tests/test_output')
 
+    # Test checking for coauthors where no coauthors are present
+    def test_for_coauthor_none(self):
+        fake_story = {"id" : 2}
+        assert not self.efiction_converter.fetch_coauthors(fake_story)
+
+    # Test checking for coauthor where there is a coauthor
+    def test_for_coauthor_existing(self):
+        # Assert list > 0
+        fake_story = {"id" : 1}
+        assert self.efiction_converter.fetch_coauthors(fake_story)
+
     def test_convert_authors(self):
         old_authors = [
             {'uid': 1, 'penname': 'Author1', 'realname': 'Author1', 'email': 'A1@example.com', 'website': '', 'bio': '',
