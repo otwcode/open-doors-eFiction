@@ -139,11 +139,11 @@ class EFictionMetadata:
         # access the coauthors table using the story ID
         full_query = f"""SELECT * FROM coauthors WHERE sid = {new_story['id']};"""
         # get a dict of coauthor IDs for the story
-        authors = self.sql.execute(self.working_original, full_query)
+        authors = self.sql.execute_and_fetchall(self.working_original, full_query)
         # We only try to operate on this result if it is not None
         if authors:
             for author in authors:
-                coauthors.append(author[1]) #TODO: check if hard coding this number is appropriate
+                coauthors.append(author['uid'])
         return coauthors
 
     def convert_stories(self, language_code):
