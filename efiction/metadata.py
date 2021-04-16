@@ -134,6 +134,18 @@ class EFictionMetadata:
                      {new_story['id'], "story", author_id}"""
         self.sql.execute(self.working_open_doors, full_query)
 
+    def fetch_coauthors(self, new_story):
+        coauthors = []
+        # access the coauthors table using the story ID
+        full_query = f"""SELECT * FROM coauthors WHERE sid = {new_story['id']};"""
+        # get a dict of coauthor IDs for the story
+        authors = self.sql.execute_and_fetchall(self.working_original, full_query)
+        # We only try to operate on this result if it is not None
+        if authors:
+            for author in authors:
+                coauthors.append(author['uid'])
+        return coauthors
+
     def convert_stories(self, language_code):
         """
         Convert eFiction stories to the Open Doors format.
@@ -166,10 +178,8 @@ class EFictionMetadata:
 
             self.logger.debug(f"  authors...")
             self._convert_author_join(new_story, old_story['uid'])
-            coauthors = []
-            if key_find('coauthors', old_story):
-                for authorid in old_story['coauthors'].split(","):
-                    coauthors.append(authorid.strip())
+            # Find if there are any coauthors for the work
+            coauthors = self.fetch_coauthors(new_story)
             for coauthor in coauthors:
                 self._convert_author_join(new_story, coauthor)
 
