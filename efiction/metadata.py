@@ -148,7 +148,9 @@ class EFictionMetadata:
 
     def convert_stories(self, language_code):
         """
-        Convert eFiction stories to the Open Doors format.
+        Convert eFiction stories to the Open Doors format. Note that we leave all the tag columns (rating, relationships,
+        tags, categories etc) empty because they are all in the `tags` table and will be populated with AO3 tags when
+        this archive is processed in the ODAP.
         :return: The Open Doors stories table as a dict.
         """
         self.logger.info("Converting stories...")
@@ -161,16 +163,14 @@ class EFictionMetadata:
                 'notes': key_find('storynotes', old_story, '').strip(),
                 'date': str(old_story['date']),
                 'updated': str(old_story['updated']),
-                'language_code': language_code,
-                'rating': old_story['rating']
+                'language_code': language_code
             }
 
             self.logger.debug(f"Converting story metadata for '{new_story['title']}'")
             query = f"""
-            INSERT INTO stories (id, title, summary, notes, date, updated, language_code, rating)
+            INSERT INTO stories (id, title, summary, notes, date, updated, language_code)
             VALUES {new_story['id'], new_story['title'], new_story['summary'],
-                    new_story['notes'], new_story['date'], new_story['updated'], new_story['language_code'],
-                    new_story['rating']};
+                    new_story['notes'], new_story['date'], new_story['updated'], new_story['language_code']};
             """
             self.sql.execute(self.working_open_doors, query)
 
