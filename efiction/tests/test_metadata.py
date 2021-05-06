@@ -1,6 +1,6 @@
 import datetime
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from efiction.metadata import EFictionMetadata
 from efiction.tests.test_utils import load_fixtures
@@ -30,13 +30,13 @@ class TestEFictionConverter(TestCase):
 
     # Test checking for coauthors where no coauthors are present
     def test_for_coauthor_none(self):
-        fake_story = {"id" : 2}
+        fake_story = {"id": 2}
         assert not self.efiction_converter.fetch_coauthors(fake_story)
 
     # Test checking for coauthor where there is a coauthor
     def test_for_coauthor_existing(self):
         # Assert list > 0
-        fake_story = {"id" : 1}
+        fake_story = {"id": 1}
         assert self.efiction_converter.fetch_coauthors(fake_story)
 
     def test_convert_authors(self):
@@ -59,7 +59,20 @@ class TestEFictionConverter(TestCase):
         self.assertEqual(5, len(authors), "there should be 5 authors")
 
     def test_convert_characters(self):
-        old_characters = [{'charid': 1, 'catid': -1, 'charname': "Bill O'Connell", 'bio': '', 'image': ''}, {'charid': 2, 'catid': -1, 'charname': 'Bob Billson', 'bio': '', 'image': ''}, {'charid': 3, 'catid': -1, 'charname': 'Fatima Habibi', 'bio': '', 'image': ''}, {'charid': 4, 'catid': -1, 'charname': 'Václav', 'bio': '', 'image': ''}, {'charid': 5, 'catid': -1, 'charname': 'Spyros Papadopoulos', 'bio': '', 'image': ''}, {'charid': 6, 'catid': -1, 'charname': 'Olu Adebayo', 'bio': '', 'image': ''}, {'charid': 7, 'catid': -1, 'charname': 'Samia Ben Abdel', 'bio': '', 'image': ''}, {'charid': 8, 'catid': -1, 'charname': 'Einar Rønquist', 'bio': '', 'image': ''}, {'charid': 9, 'catid': -1, 'charname': 'Aisha Johnson', 'bio': '', 'image': ''}, {'charid': 10, 'catid': -1, 'charname': 'Mikhael Antonov', 'bio': '', 'image': ''}, {'charid': 11, 'catid': -1, 'charname': 'Liam Habibi', 'bio': '', 'image': ''}, {'charid': 12, 'catid': -1, 'charname': 'Bernard', 'bio': '', 'image': ''}, {'charid': 13, 'catid': -1, 'charname': 'Vincent Corentin', 'bio': '', 'image': ''}, {'charid': 14, 'catid': -1, 'charname': 'Other', 'bio': '', 'image': ''}]
+        old_characters = [{'charid': 1, 'catid': -1, 'charname': "Bill O'Connell", 'bio': '', 'image': ''},
+                          {'charid': 2, 'catid': -1, 'charname': 'Bob Billson', 'bio': '', 'image': ''},
+                          {'charid': 3, 'catid': -1, 'charname': 'Fatima Habibi', 'bio': '', 'image': ''},
+                          {'charid': 4, 'catid': -1, 'charname': 'Václav', 'bio': '', 'image': ''},
+                          {'charid': 5, 'catid': -1, 'charname': 'Spyros Papadopoulos', 'bio': '', 'image': ''},
+                          {'charid': 6, 'catid': -1, 'charname': 'Olu Adebayo', 'bio': '', 'image': ''},
+                          {'charid': 7, 'catid': -1, 'charname': 'Samia Ben Abdel', 'bio': '', 'image': ''},
+                          {'charid': 8, 'catid': -1, 'charname': 'Einar Rønquist', 'bio': '', 'image': ''},
+                          {'charid': 9, 'catid': -1, 'charname': 'Aisha Johnson', 'bio': '', 'image': ''},
+                          {'charid': 10, 'catid': -1, 'charname': 'Mikhael Antonov', 'bio': '', 'image': ''},
+                          {'charid': 11, 'catid': -1, 'charname': 'Liam Habibi', 'bio': '', 'image': ''},
+                          {'charid': 12, 'catid': -1, 'charname': 'Bernard', 'bio': '', 'image': ''},
+                          {'charid': 13, 'catid': -1, 'charname': 'Vincent Corentin', 'bio': '', 'image': ''},
+                          {'charid': 14, 'catid': -1, 'charname': 'Other', 'bio': '', 'image': ''}]
         characters = self.efiction_converter._convert_characters(old_characters)
         self.assertEqual(14, len(characters), "there should be 14 characters")
 
@@ -171,6 +184,7 @@ class TestEFictionConverter(TestCase):
              'import_notes': '',
              'imported': 0,
              'notes': '',
+             'rating': None,
              'relationships': '',
              'summary': '<p>  </p>Meat-related text.',
              'tags': '',
@@ -190,6 +204,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': '',
+              'rating': None,
               'relationships': '',
               'summary': 'Short, and no tricky characters.',
               'tags': '',
@@ -208,6 +223,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': '',
+              'rating': None,
               'relationships': '',
               'summary': 'Email-related story.',
               'tags': '',
@@ -226,6 +242,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': '',
+              'rating': None,
               'relationships': '',
               'summary': 'Meow all night chew iPad power cord.',
               'tags': '',
@@ -245,6 +262,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': '',
+              'rating': None,
               'relationships': '',
               'summary': 'Biscuit candy cake candy macaroon. Soufflé marzipan croissant '
                          'gummi bears. Wafer lollipop tart topping. Bonbon danish dragée '
@@ -267,6 +285,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': '',
+              'rating': None,
               'relationships': '',
               'summary': 'Eôs in ipsum ocûrrëret.',
               'tags': '',
@@ -286,6 +305,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': '',
+              'rating': None,
               'relationships': '',
               'summary': 'Only shorter.',
               'tags': '',
@@ -304,6 +324,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': '',
+              'rating': None,
               'relationships': '',
               'summary': 'Lots and lots of cakes.',
               'tags': '',
@@ -322,6 +343,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': '',
+              'rating': None,
               'relationships': '',
               'summary': 'This is a story containing only a link to another location.',
               'tags': '',
@@ -341,6 +363,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': '',
+              'rating': None,
               'relationships': '',
               'summary': 'Things happen.',
               'tags': '',
@@ -361,6 +384,7 @@ class TestEFictionConverter(TestCase):
               'notes': "Written for someone's birthday as a small thank you for all their "
                        'hard work and dedication here on Efiction Test archive and the '
                        "Testing Solutions website.  Moderator, you're a star!",
+              'rating': None,
               'relationships': '',
               'summary': 'More vegetables.',
               'tags': '',
@@ -379,6 +403,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': '',
+              'rating': None,
               'relationships': '',
               'summary': "Database is Latin-1 and doesn't support Japanese text.",
               'tags': '',
@@ -397,6 +422,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': '',
+              'rating': None,
               'relationships': '',
               'summary': 'A nice little summary.',
               'tags': '',
@@ -415,6 +441,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': 'Some story notes about Zombies.',
+              'rating': None,
               'relationships': '',
               'summary': 'Zombie-related lorem ipsum.',
               'tags': '',
@@ -433,6 +460,7 @@ class TestEFictionConverter(TestCase):
               'import_notes': '',
               'imported': 0,
               'notes': 'Thanks to betas.',
+              'rating': None,
               'relationships': '',
               'summary': 'Bushwick man braid vaporware hot chicken yuccie snackwave '
                          'cold-pressed +1 3 wolf moon.',

@@ -148,7 +148,9 @@ class EFictionMetadata:
 
     def convert_stories(self, language_code):
         """
-        Convert eFiction stories to the Open Doors format.
+        Convert eFiction stories to the Open Doors format. Note that we leave all the tag columns (rating, relationships,
+        tags, categories etc) empty because they are all in the `tags` table and will be populated with AO3 tags when
+        this archive is processed in the ODAP.
         :return: The Open Doors stories table as a dict.
         """
         self.logger.info("Converting stories...")
