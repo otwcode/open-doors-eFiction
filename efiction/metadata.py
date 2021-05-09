@@ -27,6 +27,7 @@ class EFictionMetadata:
         self.tag_converter = TagConverter(config, logger, sql)
         self.authors = []
         self.ratings = []
+        self.ratings_nonstandard: bool = False
         self.categories = []
         self.classes = []
         self.characters = []
@@ -108,7 +109,11 @@ class EFictionMetadata:
             'classes': key_find('classes', old_story, '').split(','),
             'characters': key_find('charid', old_story, '').split(',')
         }
-        ratings = [r['id'] for r in self.ratings if str(r['original_tagid']) in old_tags['rating']]
+
+        if self.ratings_nonstandard:
+            ratings = [r['id'] for r in self.ratings if str(r['original_tag']) in old_tags['rating']]
+        else:
+            ratings = [r['id'] for r in self.ratings if str(r['original_tagid']) in old_tags['rating']]
         categories = [c['id'] for c in self.categories if str(c['original_tagid']) in old_tags['categories']]
         classes = [c['id'] for c in self.classes if str(c['original_tagid']) in old_tags['classes']]
         characters = [c['id'] for c in self.classes if str(c['original_tagid']) in old_tags['characters']]
@@ -193,6 +198,7 @@ class EFictionMetadata:
         Extract all tags by category.
         """
         self.ratings = self.tag_converter.convert_ratings()
+        self.ratings_nonstandard = self.tag_converter.check_for_nonstandard_ratings()
         self.categories = self.tag_converter.convert_categories()
         self.classes = self.tag_converter.convert_classes()
 
