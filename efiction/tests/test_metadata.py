@@ -3,38 +3,34 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 
 from efiction.metadata import EFictionMetadata
-from efiction.tests.test_utils import load_fixtures
+from efiction.tests.test_utils import load_fixtures, create_efiction_converter
 from opendoors.config import ArchiveConfig
 from opendoors.mysql import SqlDb
 from opendoors.utils import get_full_path, remove_output_files
 
-test_logger = MagicMock()
-test_config = ArchiveConfig(test_logger, "efiction", "efiction/tests/test_data").config
-test_sql = SqlDb(test_config, test_logger)
-
 
 class TestEFictionConverter(TestCase):
-    converter_config = test_config
-    converter_config['Processing']['working_dir'] = get_full_path("efiction/tests/test_output")
+    # Set up full test database with tables we don't use and "normal", foreign key (id-based) ratings
+    efiction_converter = create_efiction_converter("efiction")
 
-    efiction_converter = EFictionMetadata(converter_config, test_logger, test_sql, "test_path")
-
+    # Before and after steps and utility methods
     def setUp(self) -> None:
-        """ Load test data and create the Open Doors tables """
-        load_fixtures(test_config, test_sql)
+        """ Load test data and create the Open Doors tables for the normal eFiction tests """
+        load_fixtures(self.efiction_converter.config, self.efiction_converter.sql)
         self.efiction_converter.create_open_doors_db("test_path")
 
     def tearDown(self) -> None:
         """ Remove files created during the tests """
         remove_output_files('efiction/tests/test_output')
 
-    # Test checking for coauthors where no coauthors are present
+    # Tests
     def test_for_coauthor_none(self):
+        """ Test checking for coauthors where no coauthors are present """
         fake_story = {"id": 2}
         assert not self.efiction_converter.fetch_coauthors(fake_story)
 
-    # Test checking for coauthor where there is a coauthor
     def test_for_coauthor_existing(self):
+        """ Test checking for coauthor where there is a coauthor """
         # Assert list > 0
         fake_story = {"id": 1}
         assert self.efiction_converter.fetch_coauthors(fake_story)
@@ -76,91 +72,17 @@ class TestEFictionConverter(TestCase):
         characters = self.efiction_converter._convert_characters(old_characters)
         self.assertEqual(14, len(characters), "there should be 14 characters")
 
-    def test_convert_story_tags(self):
+    def test_convert_story_tags_normal_ratings(self):
+        """
+        Check that the test data in efiction.sql is correctly converted, including the "normal" (foreign key) ratings.
+        """
         self.efiction_converter.convert_all_tags()
         old_stories = [
             {'sid': 1, 'title': 'Bacon ipsum', 'summary': '&nbsp;<p> &nbsp;</p>Meat-related text.', 'storynotes': None,
              'catid': '1', 'classes': '3,10,16,26', 'charid': '2,1', 'rid': '3',
              'date': datetime.datetime(2006, 2, 9, 22, 21, 35), 'updated': datetime.datetime(2006, 2, 9, 22, 21, 35),
              'uid': 2, 'coauthors': None, 'featured': '', 'validated': '1', 'completed': '1', 'rr': '',
-             'wordcount': 3992, 'rating': 0, 'reviews': 2, 'count': 2872, 'challenges': '0'},
-            {'sid': 3, 'title': 'Lorem ipsum', 'summary': 'Short, and no tricky characters.', 'storynotes': None,
-             'catid': '6', 'classes': '3,10,12,15,25', 'charid': '2,1,3,4', 'rid': '5',
-             'date': datetime.datetime(2006, 3, 4, 13, 0, 45), 'updated': datetime.datetime(2006, 3, 4, 13, 0, 45),
-             'uid': 4, 'coauthors': None, 'featured': '', 'validated': '1', 'completed': '1', 'rr': '',
-             'wordcount': 8482, 'rating': 0, 'reviews': 7, 'count': 4615, 'challenges': '0'},
-            {'sid': 4, 'title': 'Email story', 'summary': 'Email-related story.', 'storynotes': None, 'catid': '6',
-             'classes': '15', 'charid': '2,1', 'rid': '3', 'date': datetime.datetime(2006, 3, 4, 13, 16, 12),
-             'updated': datetime.datetime(2006, 3, 4, 13, 16, 12), 'uid': 4, 'coauthors': None, 'featured': '',
-             'validated': '1', 'completed': '1', 'rr': '', 'wordcount': 1625, 'rating': 0, 'reviews': 1, 'count': 2390,
-             'challenges': '0'},
-            {'sid': 50, 'title': 'Cat-related ipsum', 'summary': 'Meow all night chew iPad power cord.',
-             'storynotes': None, 'catid': '6', 'classes': '3,10,11,14', 'charid': '2,1', 'rid': '2',
-             'date': datetime.datetime(2006, 3, 5, 17, 12, 16), 'updated': datetime.datetime(2006, 3, 5, 17, 12, 16),
-             'uid': 2, 'coauthors': None, 'featured': '', 'validated': '1', 'completed': '1', 'rr': '0',
-             'wordcount': 2135, 'rating': 0, 'reviews': 1, 'count': 5340, 'challenges': '0'},
-            {'sid': 51, 'title': 'Cupcake ipsum',
-             'summary': 'Biscuit candy cake candy macaroon. Soufflé marzipan croissant gummi bears. Wafer lollipop tart topping. Bonbon danish dragée lemon drops lemon drops caramels jelly. Tootsie roll chocolate cookie cake. Topping cheesecake lollipop halvah jujubes brownie bear claw. ',
-             'storynotes': None, 'catid': '6', 'classes': '3,10,11,16', 'charid': '2,1', 'rid': '3',
-             'date': datetime.datetime(2006, 3, 5, 17, 20, 38), 'updated': datetime.datetime(2006, 3, 5, 17, 20, 38),
-             'uid': 2, 'coauthors': None, 'featured': '', 'validated': '1', 'completed': '1', 'rr': '0',
-             'wordcount': 4809, 'rating': 0, 'reviews': 1, 'count': 4474, 'challenges': '0'},
-            {'sid': 54, 'title': 'Carl Sagan ipsum', 'summary': 'Only shorter.', 'storynotes': None, 'catid': '6',
-             'classes': '11,16', 'charid': '2,1', 'rid': '3', 'date': datetime.datetime(2006, 3, 5, 17, 27, 5),
-             'updated': datetime.datetime(2006, 3, 5, 17, 27, 5), 'uid': 2, 'coauthors': None, 'featured': '',
-             'validated': '1', 'completed': '1', 'rr': '0', 'wordcount': 2426, 'rating': 0, 'reviews': 0, 'count': 2018,
-             'challenges': '0'},
-            {'sid': 108, 'title': 'A lot of cakes', 'summary': 'Lots and lots of cakes.', 'storynotes': None,
-             'catid': '6', 'classes': '7,12,25', 'charid': '2,1,4', 'rid': '5',
-             'date': datetime.datetime(2006, 3, 6, 15, 42, 57), 'updated': datetime.datetime(2006, 3, 6, 15, 42, 57),
-             'uid': 3, 'coauthors': None, 'featured': '', 'validated': '1', 'completed': '1', 'rr': '', 'wordcount': 13,
-             'rating': 0, 'reviews': 0, 'count': 2020, 'challenges': '0'},
-            {'sid': 741, 'title': 'Actually a bookmark',
-             'summary': 'This is a story containing only a link to another location.', 'storynotes': None, 'catid': '1',
-             'classes': '3,7,13,19', 'charid': '2,1', 'rid': '1', 'date': datetime.datetime(2006, 3, 17, 15, 26, 36),
-             'updated': datetime.datetime(2006, 3, 17, 15, 26, 36), 'uid': 5, 'coauthors': None, 'featured': '',
-             'validated': '1', 'completed': '1', 'rr': '', 'wordcount': 12, 'rating': 0, 'reviews': 0, 'count': 2080,
-             'challenges': '0'},
-            {'sid': 835, 'title': 'Windows 1252 Story', 'summary': 'Eôs in ipsum ocûrrëret.', 'storynotes': None,
-             'catid': '1', 'classes': '3,7,13,19,30', 'charid': '2,1', 'rid': '3',
-             'date': datetime.datetime(2006, 3, 18, 12, 56, 43), 'updated': datetime.datetime(2006, 3, 18, 12, 56, 43),
-             'uid': 5, 'coauthors': None, 'featured': '', 'validated': '1', 'completed': '1', 'rr': '0',
-             'wordcount': 12, 'rating': 0, 'reviews': 0, 'count': 2066, 'challenges': '0'},
-            {'sid': 838, 'title': 'Another story in series', 'summary': 'Things happen.', 'storynotes': None,
-             'catid': '1', 'classes': '3,7,13,19', 'charid': '2,1,14', 'rid': '3',
-             'date': datetime.datetime(2006, 3, 18, 13, 42, 27), 'updated': datetime.datetime(2006, 3, 18, 13, 42, 27),
-             'uid': 5, 'coauthors': None, 'featured': '', 'validated': '1', 'completed': '1', 'rr': '', 'wordcount': 11,
-             'rating': 0, 'reviews': 0, 'count': 1310, 'challenges': '0'},
-            {'sid': 3519, 'title': 'Beans and other vegetables', 'summary': 'More vegetables.',
-             'storynotes': "Written for someone's birthday as a small thank you for all their hard work and dedication here on Efiction Test archive and the Testing Solutions website.  Moderator, you're a star!",
-             'catid': '6', 'classes': '3,7,12,25', 'charid': '2,1', 'rid': '4',
-             'date': datetime.datetime(2008, 2, 11, 13, 32, 43), 'updated': datetime.datetime(2008, 2, 11, 13, 33, 2),
-             'uid': 3, 'coauthors': '1', 'featured': '0', 'validated': '1', 'completed': '1', 'rr': '0',
-             'wordcount': 12, 'rating': 0, 'reviews': 1, 'count': 3408, 'challenges': '0'},
-            {'sid': 3721, 'title': 'Japanese', 'summary': "Database is Latin-1 and doesn't support Japanese text.",
-             'storynotes': '', 'catid': '6', 'classes': '37,1,2,3,7,10,11,14,15,16,25', 'charid': '2,5,1,9,14,3,4',
-             'rid': '4', 'date': datetime.datetime(2008, 10, 8, 20, 58, 26),
-             'updated': datetime.datetime(2008, 10, 8, 20, 58, 29), 'uid': 5, 'coauthors': '1', 'featured': '1',
-             'validated': '1', 'completed': '1', 'rr': '0', 'wordcount': 9, 'rating': 0, 'reviews': 2, 'count': 3273,
-             'challenges': '0'},
-            {'sid': 3745, 'title': 'Accented lorem ipsum', 'summary': 'A nice little summary.', 'storynotes': '',
-             'catid': '27', 'classes': '2,3,13,16', 'charid': '2,1,3,4', 'rid': '3',
-             'date': datetime.datetime(2008, 11, 28, 14, 10, 56),
-             'updated': datetime.datetime(2008, 11, 28, 14, 10, 59), 'uid': 2, 'coauthors': '1', 'featured': '0',
-             'validated': '1', 'completed': '1', 'rr': '0', 'wordcount': 33225, 'rating': 0, 'reviews': 7,
-             'count': 2303, 'challenges': '0'},
-            {'sid': 3785, 'title': 'Zombies', 'summary': 'Zombie-related lorem ipsum.',
-             'storynotes': 'Some story notes about Zombies.', 'catid': '1', 'classes': '13,14,27', 'charid': '2,1,3,4',
-             'rid': '1', 'date': datetime.datetime(2008, 12, 27, 7, 18, 6),
-             'updated': datetime.datetime(2008, 12, 27, 7, 18, 9), 'uid': 2, 'coauthors': '1', 'featured': '0',
-             'validated': '1', 'completed': '1', 'rr': '0', 'wordcount': 2828, 'rating': 0, 'reviews': 1, 'count': 3225,
-             'challenges': '0'},
-            {'sid': 4035, 'title': 'Hipster ipsum',
-             'summary': 'Bushwick man braid vaporware hot chicken yuccie snackwave cold-pressed +1 3 wolf moon.',
-             'storynotes': 'Thanks to betas.', 'catid': '6', 'classes': '16', 'charid': '2,1,11,9,3,4', 'rid': '3',
-             'date': datetime.datetime(2010, 1, 3, 10, 4, 12), 'updated': datetime.datetime(2010, 1, 3, 10, 4, 16),
-             'uid': 2, 'coauthors': '0', 'featured': '0', 'validated': '1', 'completed': '1', 'rr': '0',
-             'wordcount': 4849, 'rating': 0, 'reviews': 2, 'count': 2767, 'challenges': '0'}]
+             'wordcount': 3992, 'rating': 0, 'reviews': 2, 'count': 2872, 'challenges': '0'}]
         result = self.efiction_converter._convert_story_tags(old_stories[0])
         self.assertEqual({
             'categories': [6],
@@ -168,6 +90,30 @@ class TestEFictionConverter(TestCase):
             'classes': [70, 77, 83, 94],
             'rating': [3]
         }, result)
+
+    def test_convert_story_tags_string_ratings(self):
+        """
+        Check that the test data in efiction_string_ratings.sql is correctly converted, including the "normal" (foreign
+        key) ratings.
+        """
+        # Set up test data with string ratings
+        efiction_converter_string_ratings = create_efiction_converter("efiction_string_ratings")
+        # Create databases for this test
+        load_fixtures(efiction_converter_string_ratings.config, efiction_converter_string_ratings.sql)
+        efiction_converter_string_ratings.create_open_doors_db("test_path")
+
+        # Now convert the tags and set ratings_nonstandard
+        efiction_converter_string_ratings.convert_all_tags()
+        old_stories = [
+            {'sid': 1, 'title': 'Bacon ipsum', 'summary': '&nbsp;<p> &nbsp;</p>Meat-related text.', 'storynotes': None,
+             'catid': '1', 'classes': '3,10,16,26', 'charid': '2,1', 'rid': 'Teen',
+             'date': datetime.datetime(2006, 2, 9, 22, 21, 35), 'updated': datetime.datetime(2006, 2, 9, 22, 21, 35),
+             'uid': 2, 'coauthors': None, 'featured': '', 'validated': '1', 'completed': '1', 'rr': '',
+             'wordcount': 3992, 'rating': 0, 'reviews': 2, 'count': 2872, 'challenges': '0'}]
+        result = efiction_converter_string_ratings._convert_story_tags(old_stories[0])
+        self.assertEqual({'categories': [6], 'characters': [7], 'classes': [], 'rating': [3]}, result)
+        # Remove test files created during this test
+        remove_output_files('efiction/tests/test_output')
 
     def test_convert_stories(self):
         self.efiction_converter.convert_all_tags()
