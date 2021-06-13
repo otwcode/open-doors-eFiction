@@ -26,7 +26,7 @@ class TagConverter:
                                                                     "SELECT count(*) as cnt FROM stories WHERE rid NOT IN"
                                                                     "(SELECT rid FROM ratings)")
 
-        return count and count[0]['cnt'] > 0
+        return bool(count and count[0]['cnt'] > 0)
 
 
 
