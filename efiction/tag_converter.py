@@ -25,10 +25,10 @@ class TagConverter:
         count: List[Dict[str, int]] = self.sql.execute_and_fetchall(self.working_original,
                                                                     "SELECT count(*) as cnt FROM stories WHERE rid NOT IN"
                                                                     "(SELECT rid FROM ratings)")
-        if count and count[0]['cnt'] > 0:
-            return True
 
-        return False
+        return count and count[0]['cnt'] > 0
+
+
 
     def convert_ratings(self):
         """
