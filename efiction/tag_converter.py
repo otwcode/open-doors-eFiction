@@ -1,6 +1,8 @@
 from configparser import ConfigParser
 from logging import Logger
 
+from typing import Dict, List
+
 from opendoors.mysql import SqlDb
 from opendoors.utils import print_progress
 
@@ -12,6 +14,21 @@ class TagConverter:
         self.sql = sql
         self.working_original = self.config['Processing']['simplified_original_db']
         self.working_open_doors = self.config['Processing']['open_doors_working_db']
+
+    def check_for_nonstandard_ratings(self) -> bool:
+        """
+        Determine whether or not the eFiction ratings table correctly uses rating
+        IDs, or if it is 'non-standard' from using rating names as identifiers
+        :return: True if non-standard, otherwise False
+        """
+
+        count: List[Dict[str, int]] = self.sql.execute_and_fetchall(self.working_original,
+                                                                    "SELECT count(*) as cnt FROM stories WHERE rid NOT IN"
+                                                                    "(SELECT rid FROM ratings)")
+
+        return bool(count and count[0]['cnt'] > 0)
+
+
 
     def convert_ratings(self):
         """
