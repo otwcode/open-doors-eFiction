@@ -71,6 +71,8 @@ class EFictionMetadata:
         self.logger.info("Converting authors...")
         current = 0
         total = len(old_authors)
+        query = f"INSERT INTO authors (`id`, `name`, `email`) Values " 
+        query_lines = []
         for old_author in old_authors:
             new_author = {
                 'id': old_author['uid'],
@@ -78,10 +80,20 @@ class EFictionMetadata:
                 'email': self.generate_email(old_author['penname'], old_author['email'],
                                              self.config['Archive']['archive_name'])
             }
-            query = f"INSERT INTO authors (`id`, `name`, `email`) " \
-                    f"VALUES {new_author['id'], new_author['name'], new_author['email']}"
-            self.sql.execute(self.working_open_doors, query)
+            # construct a line that look like this:
+            # Row(id, 'name', 'email'),\n
+            query_lines.append("Row(" + ", ".join(
+                    [
+                        str(new_author['id']), 
+                        "'{}'".format(new_author['name']), 
+                        "'{}'".format(new_author['email'])
+                    ]
+                ) + ")"
+            )
             current = print_progress(current, total, "authors converted")
+        # join all lines into a complete query and add ;
+        query += ",\n".join(query_lines) + ";"
+        self.sql.execute(self.working_open_doors, query)
         return self.sql.read_table_to_dict(self.working_open_doors, "authors")
 
     def _convert_characters(self, old_characters):
