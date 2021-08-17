@@ -18,7 +18,10 @@ class SqlDb:
     def __init__(self, config: ConfigParser, logger: Logger, ):
         self.config = config
         self.logger = logger
-        self.conn = pymysql.connect(**self.get_db_config(), cursorclass=DictCursor)
+        self.conn = pymysql.connect(
+                **self.get_db_config(),
+                cursorclass=DictCursor,
+                local_infile=True)
         self.logger.info(f"Connected to MySQL database server at {self.config['Database']['host']} "
                          f"as {self.config['Database']['user']}")
 

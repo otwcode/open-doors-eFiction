@@ -52,38 +52,55 @@ class EFictionChapters:
         self.sql.execute(self.working_open_doors, "TRUNCATE TABLE chapters;")
 
         self.logger.info("...loading text from chapter files...")
-        for old_chapter in old_chapters:
-            chapid = old_chapter['chapid']
-            chapter = [chapter_path for chapter_path in chapter_paths if chapter_path['chap_id'] == str(chapid)]
-            if chapter:
-                file = chapter[0]['path']
-                try:
-                    with open(file, 'r', encoding="utf-8") as f:
-                        raw = f.read()
-                except UnicodeDecodeError as err:
-                    warnings.append(f"Chapter with id {chapid} contains non-ASCII characters which are not valid "
-                                    f"UTF-8. Trying Windows 1252...")
+        #TODO(hakiergrzonzo) make it multiplatform
+        with open("/tmp/opendoors_query_cache", "w+") as query_file:
+            for old_chapter in old_chapters:
+                chapid = old_chapter['chapid']
+                chapter = [chapter_path for chapter_path in chapter_paths if chapter_path['chap_id'] == str(chapid)]
+                if chapter:
+                    file = chapter[0]['path']
                     try:
-                        with open(file, 'r', encoding='cp1252') as f:
+                        with open(file, 'r', encoding="utf-8") as f:
                             raw = f.read()
                     except UnicodeDecodeError as err:
                         warnings.append(f"Chapter with id {chapid} contains non-ASCII characters which are not valid "
-                                        f"Windows 1252. Trying Latin 1...")
-                        with open(file, 'r', encoding='latin-1') as f:
-                            raw = f.read()
+                                        f"UTF-8. Trying Windows 1252...")
+                        try:
+                            with open(file, 'r', encoding='cp1252') as f:
+                                raw = f.read()
+                        except UnicodeDecodeError as err:
+                            warnings.append(f"Chapter with id {chapid} contains non-ASCII characters which are not valid "
+                                            f"Windows 1252. Trying Latin 1...")
+                            with open(file, 'r', encoding='latin-1') as f:
+                                raw = f.read()
 
-                text = normalize(raw)
-                if key_find('endnotes', old_chapter):
-                    text = text + f"\n\n\n<hr>\n{old_chapter['endnotes']}"
+                    text = normalize(raw)
+                    if key_find('endnotes', old_chapter):
+                        text = text + f"\n\n\n<hr>\n{old_chapter['endnotes']}"
 
-                query = """
-                    INSERT INTO chapters (id, position, title, text, story_id, notes) 
-                    VALUES (%s, %s, %s, %s, %s, %s);
-                """
-                self.sql.execute(self.working_open_doors, query,
-                                 (chapid, old_chapter['inorder'], old_chapter['title'], text,
-                                  old_chapter['sid'], old_chapter['notes']))
-            current = print_progress(current, total, "chapters converted")
+                    #query = """
+                    #    INSERT INTO chapters (id, position, title, text, story_id, notes) 
+                    #    VALUES (%s, %s, %s, %s, %s, %s);
+                    #"""
+                    #self.sql.execute(self.working_open_doors, query,
+                    #                 (chapid, old_chapter['inorder'], old_chapter['title'], text,
+                    #                  old_chapter['sid'], old_chapter['notes']))
+                    query_file.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(
+                        chapid,
+                        old_chapter['inorder'],
+                        old_chapter['title'],
+                        text.replace("\t", " " * 4),
+                        old_chapter['sid'],
+                        old_chapter['notes']
+                    ))
+                current = print_progress(current, total, "chapters converted")
+        self.sql.execute(self.working_open_doors, """
+            LOAD DATA LOCAL INFILE '/tmp/opendoors_query_cache'
+            INTO TABLE chapters
+            fields terminated by '\t'
+            lines terminated by '\n'
+            (id, position, title, text, story_id, notes);
+        """)
 
         # If there were any errors, display a warning for the user to check the affected chapters
         if warnings:
