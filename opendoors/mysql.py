@@ -164,3 +164,14 @@ class SqlDb:
             f.write(";\n")
         f.close()
         return destination_filepath
+
+    def get_another_connection(self):
+        return SqlDb(self.config, self.logger)
+
+    def __del__(self):
+        try:
+            self.conn.close()
+        except:
+            pass
+
+

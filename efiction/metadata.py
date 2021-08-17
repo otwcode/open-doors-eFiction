@@ -9,6 +9,7 @@ from efiction.tag_converter import TagConverter
 from opendoors.mysql import SqlDb
 from opendoors.sql_utils import parse_remove_comments, write_statements_to_file, add_create_database
 from opendoors.utils import print_progress, get_full_path, normalize, key_find
+from opendoors.thread_pool import ThreadedPool
 
 
 class EFictionMetadata:
@@ -137,26 +138,35 @@ class EFictionMetadata:
             'characters': characters
         }
 
-    def _convert_tags_join(self, new_story, tags):
+    def _convert_tags_join(self, new_story, tags, sql=None):
         full_query = f"INSERT INTO item_tags (item_id, item_type, tag_id) VALUES "
         tag_query = []
         for tag_list in tags.values():
             for tag in tag_list:
                 tag_query.append(f"""{new_story['id'], "story", tag}""")
         full_query += ", ".join(tag_query)
-        self.sql.execute(self.working_open_doors, full_query)
+        if sql is None:
+            self.sql.execute(self.working_open_doors, full_query)
+        else:
+            sql.execute(self.working_open_doors, full_query)
 
-    def _convert_author_join(self, new_story, author_id):
+    def _convert_author_join(self, new_story, author_id, sql=None):
         full_query = f"""INSERT INTO item_authors (item_id, item_type, author_id) VALUES 
                      {new_story['id'], "story", author_id}"""
-        self.sql.execute(self.working_open_doors, full_query)
+        if sql is None:
+            self.sql.execute(self.working_open_doors, full_query)
+        else:
+            sql.execute(self.working_open_doors, full_query)
 
-    def fetch_coauthors(self, new_story):
+    def fetch_coauthors(self, new_story, sql=None):
         coauthors = []
         # access the coauthors table using the story ID
         full_query = f"""SELECT * FROM coauthors WHERE sid = {new_story['id']};"""
         # get a dict of coauthor IDs for the story
-        authors = self.sql.execute_and_fetchall(self.working_original, full_query)
+        if sql is None:
+            authors = self.sql.execute_and_fetchall(self.working_original, full_query)
+        else:
+            authors = sql.execute_and_fetchall(self.working_original, full_query)
         # We only try to operate on this result if it is not None
         if authors:
             for author in authors:
@@ -172,7 +182,11 @@ class EFictionMetadata:
         """
         self.logger.info("Converting stories...")
         old_stories, current, total = self.sql.read_table_with_total(self.working_original, "stories")
-        for old_story in old_stories:
+        def story_processor(old_story):
+            # this code is a warcrime for now
+            #TODO(hakiergrzonzo): clean this up
+            # create a new connection to mysql
+            sql = self.sql.get_another_connection()
             new_story = {
                 'id': old_story['sid'],
                 'title': key_find('title', old_story, '').strip(),
@@ -189,20 +203,24 @@ class EFictionMetadata:
             VALUES {new_story['id'], new_story['title'], new_story['summary'],
                     new_story['notes'], new_story['date'], new_story['updated'], new_story['language_code']};
             """
-            self.sql.execute(self.working_open_doors, query)
+            sql.execute(self.working_open_doors, query)
 
             self.logger.debug(f"  tags...")
             tags = self._convert_story_tags(old_story)
-            self._convert_tags_join(new_story, tags)
+            # pass the new sql to be used instead of the main one
+            self._convert_tags_join(new_story, tags, sql)
 
             self.logger.debug(f"  authors...")
-            self._convert_author_join(new_story, old_story['uid'])
+            self._convert_author_join(new_story, old_story['uid'], sql)
             # Find if there are any coauthors for the work
-            coauthors = self.fetch_coauthors(new_story)
+            coauthors = self.fetch_coauthors(new_story, sql)
             for coauthor in coauthors:
-                self._convert_author_join(new_story, coauthor)
+                self._convert_author_join(new_story, coauthor, sql)
+            #current = print_progress(current, total, "stories converted")
+        
+        pool = ThreadedPool(20)
+        pool.map(story_processor, [[x] for x in old_stories])
 
-            current = print_progress(current, total, "stories converted")
         return self.sql.execute_and_fetchall(self.working_open_doors, "SELECT * FROM stories")
 
     def convert_all_tags(self):
