@@ -10,6 +10,7 @@ from opendoors.mysql import SqlDb
 from opendoors.sql_utils import parse_remove_comments, write_statements_to_file, add_create_database
 from opendoors.utils import print_progress, get_full_path, normalize, key_find
 from opendoors.thread_pool import ThreadedPool
+from opendoors.big_insert import BigInsert
 
 
 class EFictionMetadata:
@@ -72,8 +73,12 @@ class EFictionMetadata:
         self.logger.info("Converting authors...")
         current = 0
         total = len(old_authors)
-        query = f"INSERT INTO authors (`id`, `name`, `email`) Values " 
-        query_lines = []
+        insert_op = BigInsert(
+                self.working_open_doors,
+                "authors",
+                ["id", "name", "email"],
+                self.sql
+            )
         for old_author in old_authors:
             new_author = {
                 'id': old_author['uid'],
@@ -83,22 +88,19 @@ class EFictionMetadata:
             }
             # construct a line that look like this:
             # Row(id, 'name', 'email'),\n
-            query_lines.append("Row(" + ", ".join(
-                    [
-                        str(new_author['id']), 
-                        "'{}'".format(new_author['name']), 
-                        "'{}'".format(new_author['email'])
-                    ]
-                ) + ")"
-            )
+            insert_op.addRow(new_author['id'], new_author["name"], new_author["email"])
             current = print_progress(current, total, "authors converted")
-        # join all lines into a complete query and add ;
-        query += ",\n".join(query_lines) + ";"
-        self.sql.execute(self.working_open_doors, query)
+        insert_op.send()
         return self.sql.read_table_to_dict(self.working_open_doors, "authors")
 
     def _convert_characters(self, old_characters):
         current, total = (0, len(old_characters))
+        insert_op = BigInsert(
+            self.working_open_doors,
+            "tags",
+            ["original_tagid", "original_tag", "original_type", "original_parent"],
+            self.sql
+        )
         for old_character in old_characters:
             parent = [ct['original_tag'] for ct in self.categories if ct['original_tagid'] == old_character['catid']]
             new_tag = {
@@ -106,12 +108,14 @@ class EFictionMetadata:
                 'name': old_character['charname'],
                 'parent': ", ".join(parent) if parent != [] else ""
             }
-            query = f"""
-            INSERT INTO tags (`original_tagid`, `original_tag`, `original_type`, `original_parent`)
-            VALUES {new_tag['id'], new_tag['name'], 'character', new_tag['parent']};
-            """
-            self.sql.execute(self.working_open_doors, query)
+            #query = f"""
+            #INSERT INTO tags (`original_tagid`, `original_tag`, `original_type`, `original_parent`)
+            #VALUES {new_tag['id'], new_tag['name'], 'character', new_tag['parent']};
+            #"""
+            #self.sql.execute(self.working_open_doors, query)
+            insert_op.addRow(new_tag["id"], new_tag["name"], "character", new_tag["parent"])
             current = print_progress(current, total, "characters converted")
+        insert_op.send()
         return self.sql.execute_and_fetchall(self.working_open_doors,
                                              "SELECT * FROM tags WHERE `original_type` = 'character'")
 
@@ -183,9 +187,11 @@ class EFictionMetadata:
         self.logger.info("Converting stories...")
         old_stories, current, total = self.sql.read_table_with_total(self.working_original, "stories")
         def story_processor(old_story):
-            # this code is a warcrime for now
-            #TODO(hakiergrzonzo): clean this up
-            # create a new connection to mysql
+            """
+            Lambda-esque function that clones connection to database and 
+            fully converts the given story
+            :param old_story: Original story read from the database
+            """
             sql = self.sql.get_another_connection()
             new_story = {
                 'id': old_story['sid'],
@@ -216,8 +222,10 @@ class EFictionMetadata:
             coauthors = self.fetch_coauthors(new_story, sql)
             for coauthor in coauthors:
                 self._convert_author_join(new_story, coauthor, sql)
-            #current = print_progress(current, total, "stories converted")
         
+        # if you give to little threads, it will be too slow,
+        # if you give too much - it will fail while attempting to connect to db
+        # (mysql does not like 200 connections); 20 seems to be a nice balance
         pool = ThreadedPool(20)
         pool.map(story_processor, [[x] for x in old_stories])
 
