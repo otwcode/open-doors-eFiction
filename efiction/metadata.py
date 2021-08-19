@@ -86,8 +86,6 @@ class EFictionMetadata:
                 'email': self.generate_email(old_author['penname'], old_author['email'],
                                              self.config['Archive']['archive_name'])
             }
-            # construct a line that look like this:
-            # Row(id, 'name', 'email'),\n
             insert_op.addRow(new_author['id'], new_author["name"], new_author["email"])
             current = print_progress(current, total, "authors converted")
         insert_op.send()
@@ -108,11 +106,6 @@ class EFictionMetadata:
                 'name': old_character['charname'],
                 'parent': ", ".join(parent) if parent != [] else ""
             }
-            #query = f"""
-            #INSERT INTO tags (`original_tagid`, `original_tag`, `original_type`, `original_parent`)
-            #VALUES {new_tag['id'], new_tag['name'], 'character', new_tag['parent']};
-            #"""
-            #self.sql.execute(self.working_open_doors, query)
             insert_op.addRow(new_tag["id"], new_tag["name"], "character", new_tag["parent"])
             current = print_progress(current, total, "characters converted")
         insert_op.send()
