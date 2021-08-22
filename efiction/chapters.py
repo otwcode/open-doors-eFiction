@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 
 from opendoors.mysql import SqlDb
+from opendoors.big_insert import BigInsert
 from opendoors.utils import get_full_path, normalize, print_progress, make_banner, key_find
 
 
@@ -52,6 +53,12 @@ class EFictionChapters:
         self.sql.execute(self.working_open_doors, "TRUNCATE TABLE chapters;")
 
         self.logger.info("...loading text from chapter files...")
+        insert_op = BigInsert(
+                self.working_open_doors,
+                "chapters", 
+                ["id", "position", "title", "text", "story_id", "notes"],
+                self.sql
+            )
         for old_chapter in old_chapters:
             chapid = old_chapter['chapid']
             chapter = [chapter_path for chapter_path in chapter_paths if chapter_path['chap_id'] == str(chapid)]
@@ -76,15 +83,16 @@ class EFictionChapters:
                 if key_find('endnotes', old_chapter):
                     text = text + f"\n\n\n<hr>\n{old_chapter['endnotes']}"
 
-                query = """
-                    INSERT INTO chapters (id, position, title, text, story_id, notes) 
-                    VALUES (%s, %s, %s, %s, %s, %s);
-                """
-                self.sql.execute(self.working_open_doors, query,
-                                 (chapid, old_chapter['inorder'], old_chapter['title'], text,
-                                  old_chapter['sid'], old_chapter['notes']))
+                insert_op.addRow(
+                    chapid,
+                    old_chapter['inorder'],
+                    old_chapter['title'],
+                    text,
+                    old_chapter['sid'],
+                    old_chapter['notes']
+                )
             current = print_progress(current, total, "chapters converted")
-
+        insert_op.send()
         # If there were any errors, display a warning for the user to check the affected chapters
         if warnings:
             self.logger.warning("\n".join(warnings))

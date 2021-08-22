@@ -15,11 +15,15 @@ class SqlDb:
     Wrapper and helper methods for MySQL commands
     """
 
-    def __init__(self, config: ConfigParser, logger: Logger, ):
+    def __init__(self, config: ConfigParser, logger: Logger, suppress_log: bool = False):
         self.config = config
         self.logger = logger
-        self.conn = pymysql.connect(**self.get_db_config(), cursorclass=DictCursor)
-        self.logger.info(f"Connected to MySQL database server at {self.config['Database']['host']} "
+        self.conn = pymysql.connect(
+                **self.get_db_config(),
+                cursorclass=DictCursor,
+                local_infile=True)
+        if not suppress_log:
+            self.logger.info(f"Connected to MySQL database server at {self.config['Database']['host']} "
                          f"as {self.config['Database']['user']}")
 
     def get_db_config(self):
@@ -164,3 +168,33 @@ class SqlDb:
             f.write(";\n")
         f.close()
         return destination_filepath
+
+    def get_another_connection(self):
+        """
+        Returns another connection to the database, with the same config
+        """
+        return SqlDb(self.config, self.logger, True)
+
+    def ensure_local_infile(self):
+        """
+        Checks if local_infile is enabled, and if not enables it
+        """
+        local_infile_query = r"SELECT @@global.local_infile"
+        cursor = self.conn.cursor()
+        cursor.execute(local_infile_query)
+        if not cursor.fetchone()[r"@@global.local_infile"]:
+            self.logger.info("Enabling local_infile inserts for faster processing")
+            cursor.execute("SET GLOBAL local_infile=1")
+        cursor.close()
+
+
+    def __del__(self):
+        """
+        Destructor to disconnect from the database
+        """
+        try:
+            self.conn.close()
+        except:
+            pass
+
+
