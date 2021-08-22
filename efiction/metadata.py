@@ -80,6 +80,7 @@ class EFictionMetadata:
                 self.sql
             )
         for old_author in old_authors:
+            # convert all old_authors into rows in the insert operation
             new_author = {
                 'id': old_author['uid'],
                 'name': old_author['penname'],
@@ -136,34 +137,34 @@ class EFictionMetadata:
         }
 
     def _convert_tags_join(self, new_story, tags, sql=None):
+        # Support using non-default sql connection for multithreaded workloads
+        if sql is None:
+            sql = self.sql
         full_query = f"INSERT INTO item_tags (item_id, item_type, tag_id) VALUES "
         tag_query = []
         for tag_list in tags.values():
             for tag in tag_list:
                 tag_query.append(f"""{new_story['id'], "story", tag}""")
         full_query += ", ".join(tag_query)
-        if sql is None:
-            self.sql.execute(self.working_open_doors, full_query)
-        else:
-            sql.execute(self.working_open_doors, full_query)
+        sql.execute(self.working_open_doors, full_query)
 
     def _convert_author_join(self, new_story, author_id, sql=None):
+        # Support using non-default sql connection for multithreaded workloads
+        if sql is None:
+            sql = self.sql
         full_query = f"""INSERT INTO item_authors (item_id, item_type, author_id) VALUES 
                      {new_story['id'], "story", author_id}"""
-        if sql is None:
-            self.sql.execute(self.working_open_doors, full_query)
-        else:
-            sql.execute(self.working_open_doors, full_query)
+        sql.execute(self.working_open_doors, full_query)
 
     def fetch_coauthors(self, new_story, sql=None):
+        # Support using non-default sql connection for multithreaded workloads
+        if sql is None:
+            sql = self.sql
         coauthors = []
         # access the coauthors table using the story ID
         full_query = f"""SELECT * FROM coauthors WHERE sid = {new_story['id']};"""
         # get a dict of coauthor IDs for the story
-        if sql is None:
-            authors = self.sql.execute_and_fetchall(self.working_original, full_query)
-        else:
-            authors = sql.execute_and_fetchall(self.working_original, full_query)
+        authors = sql.execute_and_fetchall(self.working_original, full_query)
         # We only try to operate on this result if it is not None
         if authors:
             for author in authors:

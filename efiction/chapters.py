@@ -83,13 +83,6 @@ class EFictionChapters:
                 if key_find('endnotes', old_chapter):
                     text = text + f"\n\n\n<hr>\n{old_chapter['endnotes']}"
 
-                #query = """
-                #    INSERT INTO chapters (id, position, title, text, story_id, notes) 
-                #    VALUES (%s, %s, %s, %s, %s, %s);
-                #"""
-                #self.sql.execute(self.working_open_doors, query,
-                #                 (chapid, old_chapter['inorder'], old_chapter['title'], text,
-                #                  old_chapter['sid'], old_chapter['notes']))
                 insert_op.addRow(
                     chapid,
                     old_chapter['inorder'],
