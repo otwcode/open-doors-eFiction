@@ -138,8 +138,7 @@ class EFictionMetadata:
 
     def _convert_tags_join(self, new_story, tags, sql=None):
         # Support using non-default sql connection for multithreaded workloads
-        if sql is None:
-            sql = self.sql
+        sql = self.sql if sql is None else sql
         full_query = f"INSERT INTO item_tags (item_id, item_type, tag_id) VALUES "
         tag_query = []
         for tag_list in tags.values():
@@ -150,16 +149,14 @@ class EFictionMetadata:
 
     def _convert_author_join(self, new_story, author_id, sql=None):
         # Support using non-default sql connection for multithreaded workloads
-        if sql is None:
-            sql = self.sql
+        sql = self.sql if sql is None else sql
         full_query = f"""INSERT INTO item_authors (item_id, item_type, author_id) VALUES 
                      {new_story['id'], "story", author_id}"""
         sql.execute(self.working_open_doors, full_query)
 
     def fetch_coauthors(self, new_story, sql=None):
         # Support using non-default sql connection for multithreaded workloads
-        if sql is None:
-            sql = self.sql
+        sql = self.sql if sql is None else sql
         coauthors = []
         # access the coauthors table using the story ID
         full_query = f"""SELECT * FROM coauthors WHERE sid = {new_story['id']};"""
