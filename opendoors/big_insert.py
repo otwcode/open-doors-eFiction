@@ -1,5 +1,6 @@
 from .mysql import SqlDb
 from tempfile import NamedTemporaryFile
+from os import unlink
 
 class BigInsert:
     def __init__(self, database: str, table_name: str, columns: list, sql: SqlDb):
@@ -15,13 +16,15 @@ class BigInsert:
         self._sql.ensure_local_infile()
         self._database = database
         self._columns = columns
-        self._tempfile = NamedTemporaryFile("w+")
+        self._tempfile = NamedTemporaryFile("w+", delete=False, suffix=".otw.tmp")
+        # convert windows slashes to unix becouse windows needs it like that?
+        windows_friendly_name = self._tempfile.name.replace("\\", "/")
         # We are storing data as a `tab separated` file
         # as tabs are just converted back into spaces
         # in HTML, we can just convert them here, instead of
         # some complicated escaping system
         self._query = f"""
-            LOAD DATA LOCAL INFILE '{self._tempfile.name}'
+            LOAD DATA LOCAL INFILE '{windows_friendly_name}'
             INTO TABLE {table_name}
             FIELDS TERMINATED BY '\t'
             LINES TERMINATED BY '\n'
@@ -48,9 +51,11 @@ class BigInsert:
         """
         Perform insert operation and delete temporary file
         """
-        self._tempfile.flush()
-        self._sql.execute(self._database, self._query)
+        # free file for windows to read it
         self._tempfile.close()
+        self._sql.execute(self._database, self._query)
+        # delete file
+        unlink(self._tempfile.name)
         self._tempfile = None
         
 
