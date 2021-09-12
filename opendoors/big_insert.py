@@ -17,7 +17,7 @@ class BigInsert:
         self._database = database
         self._columns = columns
         self._tempfile = NamedTemporaryFile("w+", delete=False, suffix=".otw.tmp", encoding="utf-8")
-        # convert windows slashes to unix becouse windows needs it like that?
+        # convert windows slashes to unix because windows needs it like that?
         windows_friendly_name = self._tempfile.name.replace("\\", "/")
         # We are storing data as a `tab separated` file
         # as tabs are just converted back into spaces
