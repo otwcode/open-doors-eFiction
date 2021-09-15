@@ -76,12 +76,15 @@ def parse_remove_comments(original_db_sql: str):
 
 def remove_invalid_date_default(statement: str) -> str:
     """
-    Replace datetime column definitions which are invalid in MySQL 5.7.
+    Replace datetime and/or timestamp column definitions which are invalid in MySQL 5.7.
     :param statement: SQL statement to modify
     :return: modified statement
     """
-    return re.sub(r"datetime not null default '0000-00-00 00:00:00'", "datetime DEFAULT NULL", statement,
+    stmt = re.sub(r"datetime not null default '0000-00-00 00:00:00'", "datetime DEFAULT NULL", statement,
                   flags=re.IGNORECASE)
+    stmt = re.sub(r"timestamp[\(][0-9]+[\)]", "timestamp", statement,
+                  flags=re.IGNORECASE)
+    return stmt
 
 
 def remove_unwanted_statements(statement: str) -> str:
