@@ -148,3 +148,17 @@ def normalize(text):
     :return: normalized, unescaped text
     """
     return unicodedata.normalize("NFKD", html.unescape(text) or '').strip()
+
+def get_prefixed_path(step: str, path: str, filename: str=""):
+    """
+    Adds the efiction step prefix to filenames or folders
+    :param step: The current step
+    :param path: The base path
+    :param filename: The file name. If left null, default is to create new folder
+    :return: The path with the efiction prefix added as a folder or to a file name.
+    """
+    prefix = f"efiction-{step}"
+    if filename:
+        return os.path.join(path, f"{prefix}-{filename}")
+    else:
+        return os.path.join(path, prefix)

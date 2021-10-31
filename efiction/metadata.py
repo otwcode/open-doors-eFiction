@@ -8,7 +8,7 @@ from unidecode import unidecode
 from efiction.tag_converter import TagConverter
 from opendoors.mysql import SqlDb
 from opendoors.sql_utils import parse_remove_comments, write_statements_to_file, add_create_database
-from opendoors.utils import print_progress, get_full_path, normalize, key_find
+from opendoors.utils import print_progress, get_full_path, normalize, key_find, get_prefixed_path
 from opendoors.thread_pool import ThreadedPool
 from opendoors.big_insert import BigInsert
 
@@ -44,7 +44,7 @@ class EFictionMetadata:
         self.config['Processing']['open_doors_working_db'] = \
             f"{self.config['Archive']['code_name']}_working_open_doors"
         self.config['Processing']['open_doors_working_db_file'] = \
-            os.path.join(step_path, f"{self.config['Processing']['open_doors_working_db']}.sql")
+            get_prefixed_path("03", step_path, f"{self.config['Processing']['open_doors_working_db']}.sql")
 
         with open(od_table_sql_file, "r") as f:
             od_table_defs = parse_remove_comments(f.read())
@@ -255,7 +255,7 @@ class EFictionMetadata:
 
         self.convert_stories(language)
 
-        database_dump = os.path.join(step_path, f"{self.working_open_doors}_without_chapters.sql")
+        database_dump = get_prefixed_path("03", step_path, f"{self.working_open_doors}_without_chapters.sql")
         self.logger.info(f"Exporting converted tables to {database_dump}...")
         self.sql.dump_database(self.working_open_doors, database_dump)
         return True
