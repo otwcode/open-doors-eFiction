@@ -32,15 +32,19 @@ class UtilsTest(TestCase):
                          "a path based on the user folder should be used if no path is supplied")
 
     def test_prefixed_path_no_filename(self):
-        test_path = get_prefixed_path("01",r"C:\Users\testuser\Documents\Open Doors")
-        full_path = r"C:\Users\testuser\Documents\Open Doors\efiction-01"
+        base_path = str(Path().home() / "otw_opendoors")
+        test_path = get_prefixed_path("01", base_path)
+        full_path = str(Path().home() / "otw_opendoors"  / "efiction-01")
         self.assertEqual(full_path,
                          test_path,
                          "step folder should be created in lieu of filename")
 
     def test_prefixed_path_with_filename(self):
-        test_path = get_prefixed_path("01",r"C:\Users\testuser\Documents\Open Doors\efiction-01","test_working_open_doors.sql")
-        full_path = r"C:\Users\testuser\Documents\Open Doors\efiction-01\efiction-01-test_working_open_doors.sql"
+        prefix = "efiction-01"
+        base_path = str(Path().home() / "otw_opendoors" / prefix)
+        file_name = "test_working_open_doors.sql"
+        test_path = get_prefixed_path("01", base_path, file_name)
+        full_path = str(Path().home() / "otw_opendoors" / prefix / f"{prefix}-{file_name}")
         self.assertEqual(full_path,
                          test_path,
                          "filename should be prefixed with step")
