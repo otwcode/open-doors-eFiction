@@ -26,12 +26,11 @@ class BigInsert:
         #
         # However we need to preserve newlines because they will eventually get
         # cleaned up into proper tags, hence we will escape them into proper \n
-        self._query = f"""
+        self._query = fr"""
             LOAD DATA LOCAL INFILE '{windows_friendly_name}'
             INTO TABLE {table_name}
-            FIELDS TERMINATED BY '\t'
+            FIELDS TERMINATED BY '\t' ESCAPED BY '\\'
             LINES TERMINATED BY '\n'
-            ESCAPED BY '\\'
             ({", ".join(columns)})
         """
         self._sql.logger.debug(f"Created BigInsert with query {self._query}")
