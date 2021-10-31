@@ -23,11 +23,15 @@ class BigInsert:
         # as tabs are just converted back into spaces
         # in HTML, we can just convert them here, instead of
         # some complicated escaping system
+        #
+        # However we need to preserve newlines because they will eventually get
+        # cleaned up into proper tags, hence we will escape them into proper \n
         self._query = f"""
             LOAD DATA LOCAL INFILE '{windows_friendly_name}'
             INTO TABLE {table_name}
             FIELDS TERMINATED BY '\t'
             LINES TERMINATED BY '\n'
+            ESCAPED BY '\\'
             ({", ".join(columns)})
         """
         self._sql.logger.debug(f"Created BigInsert with query {self._query}")
@@ -42,8 +46,8 @@ class BigInsert:
             raise Exception("Query was already sent")
         if len(args) != len(self._columns):
             raise Exception("Number of arguments does not equal number of columns!")
-        # remove tabs and newlines
-        values = [x.replace("\t", " ").replace("\n", " ") if isinstance(x, str) else str(x) for x in args]
+        # remove tabs and escape newlines
+        values = [x.replace("\t", " ").replace("\n", "\\n") if isinstance(x, str) else str(x) for x in args]
         line = "\t".join(values) + "\n"
         self._tempfile.write(line)
 
