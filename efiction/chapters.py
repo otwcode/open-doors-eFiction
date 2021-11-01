@@ -6,7 +6,7 @@ from typing import List
 
 from opendoors.mysql import SqlDb
 from opendoors.big_insert import BigInsert
-from opendoors.utils import get_full_path, normalize, print_progress, make_banner, key_find
+from opendoors.utils import get_full_path, normalize, print_progress, make_banner, key_find, get_prefixed_path
 
 
 class EFictionChapters:
@@ -131,7 +131,7 @@ class EFictionChapters:
             chapter_paths = self.__list_chapter_files()
             self.__load_chapter_text_into_db(chapter_paths)
 
-        database_dump = os.path.join(step_path, f"{self.working_open_doors}.sql")
+        database_dump = get_prefixed_path("04", step_path, f"{self.working_open_doors}.sql")
         self.logger.info(f"Exporting converted tables to {database_dump}...")
         self.sql.dump_database(self.working_open_doors, database_dump)
         return True

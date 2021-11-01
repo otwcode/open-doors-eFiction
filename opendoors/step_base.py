@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from logging import Logger
 
 from opendoors.mysql import SqlDb
-from opendoors.utils import make_banner
+from opendoors.utils import make_banner, get_prefixed_path
 
 
 @dataclass
@@ -36,7 +36,7 @@ class StepBase:
         self.logger.info(banner)
 
     def create_working_sub_dir(self):
-        self.step_path = os.path.join(self.config['Processing']['working_dir'], self.step)
+        self.step_path = get_prefixed_path(self.step, self.config['Processing']['working_dir'])
         if os.path.exists(self.step_path):
             shutil.rmtree(self.step_path)
             self.logger.info(f"Deleted existing {self.step} folder to start from scratch")

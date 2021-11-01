@@ -8,7 +8,7 @@ from logging import Logger
 from efiction.eFiction_table_defs import create_def
 from opendoors.mysql import SqlDb
 from opendoors.sql_utils import write_statements_to_file, parse_remove_comments, group_by_table, add_create_database
-from opendoors.utils import copy_to_dir, check_if_file_exists, get_full_path
+from opendoors.utils import copy_to_dir, check_if_file_exists, get_full_path, get_prefixed_path
 
 
 class EFictionOriginal:
@@ -97,7 +97,7 @@ class EFictionOriginal:
         :return:
         """
         self.logger.info("...writing edited SQL statements to a backup file...")
-        edited_file_path = os.path.join(step_path, self.edited_file_name)
+        edited_file_path = get_prefixed_path("01", step_path, self.edited_file_name)
         self.config['Processing']['original_edited_file'] = edited_file_path
         edited_file = write_statements_to_file(self.config['Processing']['original_edited_file'], statements)
 

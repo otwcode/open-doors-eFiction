@@ -2,7 +2,7 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
-from opendoors.utils import make_banner, set_working_dir
+from opendoors.utils import make_banner, set_working_dir, get_prefixed_path
 
 
 class UtilsTest(TestCase):
@@ -30,3 +30,21 @@ class UtilsTest(TestCase):
         self.assertEqual(str(Path().home() / "otw_opendoors" / "archive_code"),
                          working_dir_2,
                          "a path based on the user folder should be used if no path is supplied")
+
+    def test_prefixed_path_no_filename(self):
+        base_path = str(Path().home() / "otw_opendoors")
+        test_path = get_prefixed_path("01", base_path)
+        full_path = str(Path().home() / "otw_opendoors"  / "efiction-01")
+        self.assertEqual(full_path,
+                         test_path,
+                         "step folder should be created in lieu of filename")
+
+    def test_prefixed_path_with_filename(self):
+        prefix = "efiction-01"
+        base_path = str(Path().home() / "otw_opendoors" / prefix)
+        file_name = "test_working_open_doors.sql"
+        test_path = get_prefixed_path("01", base_path, file_name)
+        full_path = str(Path().home() / "otw_opendoors" / prefix / f"{prefix}-{file_name}")
+        self.assertEqual(full_path,
+                         test_path,
+                         "filename should be prefixed with step")

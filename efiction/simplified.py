@@ -5,7 +5,7 @@ from logging import Logger
 
 from opendoors.mysql import SqlDb
 from opendoors.sql_utils import group_by_table, add_create_database, parse_remove_comments, write_statements_to_file
-from opendoors.utils import get_full_path
+from opendoors.utils import get_full_path, get_prefixed_path
 
 
 class EFictionSimplified:
@@ -69,7 +69,7 @@ class EFictionSimplified:
         grouped_statements = self._remove_unwanted_tables(statements)
 
         # Flatten grouped SQL statements and add CREATE DATABASE statement
-        output_filename = os.path.join(step_path, f"{self.simplified_db_name}.sql")
+        output_filename = get_prefixed_path("02", step_path, f"{self.simplified_db_name}.sql")
         flattened_statements = [item for sublist in list(grouped_statements.values()) for item in sublist]
         final_statements = add_create_database(self.simplified_db_name, flattened_statements)
 
