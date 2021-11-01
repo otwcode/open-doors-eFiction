@@ -45,9 +45,11 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         code_name = sys.argv[1]
     else:
-        code_name = input(
-            "Please provide a short, lowercase code name with no spaces or punctuation for the archive "
-            "you are processing (and make a note of it as you'll need it in future!):\n>> ")
+        code_name = None
+        while (code_name == None or any([x not in "qwertyuiopasdfghjklzxcvbnm" for x in code_name])):
+            code_name = input(
+                "Please provide a short, lowercase code name with no spaces or punctuation for the archive "
+                "you are processing (and make a note of it as you'll need it in future!):\n>> ")
 
     banner_text = f"""Starting processing for archive "{code_name}"..."""
     banner = make_banner('=', banner_text)
