@@ -1,4 +1,5 @@
 import os
+import chardet
 from configparser import ConfigParser
 from logging import Logger
 from pathlib import Path
@@ -64,6 +65,37 @@ class EFictionChapters:
             chapter = [chapter_path for chapter_path in chapter_paths if chapter_path['chap_id'] == str(chapid)]
             if chapter:
                 file = chapter[0]['path']
+                with open(file, 'rb') as raw_chapter:
+                    raw = raw_chapter.read()
+                    encoding = chardet.detect(raw)
+                    if encoding['confidence'] < 0.7:
+                        warnings.append(
+                            f"Low confidence in {encoding['encoding']} in file {chapter_path}: {round(encoding['confidence'] * 100)}%"
+                        )
+                    while isinstance(raw, bytes):
+                        try:
+                            raw = raw.decode(encoding=encoding['encoding'])
+                        except UnicodeDecodeError as e:
+                            error = f"Failed to decode {file}\n"
+                            line_num = raw[:e.start].decode(encoding['encoding']).count("\n")
+                            error += f"At line {line_num}:\t{str(e)}\n"
+                            error += "--\t" + str(raw[max(e.start - 40, 0):e.end + 30]) + "\n"
+                            # print `^` under the offending byte
+                            error += "\t" + \
+                                     " " * (len(str(raw[max(e.start - 40, 0):e.start])) - 1) + \
+                                     "^" * (len(str(raw[e.start:e.end])) - 3) + "\n"
+                            error += "Will be converted to:\n"
+                            # remove the offending bytes (usually one)
+                            raw = raw[:e.start] + raw[e.end:]
+                            error += "++\t  " + raw[
+                                                    max(e.start - 40, 0):
+                                                    e.end + 30
+                                                ].decode(encoding['encoding']) \
+                                                .replace("\n", "\\n")          \
+                                                .replace("\r", "\\r")
+                            warnings.append(error)
+
+                """
                 try:
                     with open(file, 'r', encoding="utf-8") as f:
                         raw = f.read()
@@ -79,6 +111,7 @@ class EFictionChapters:
                         with open(file, 'r', encoding='latin-1') as f:
                             raw = f.read()
 
+                """
                 text = normalize(raw)
                 if key_find('endnotes', old_chapter):
                     text = text + f"\n\n\n<hr>\n{old_chapter['endnotes']}"
