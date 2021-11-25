@@ -228,8 +228,10 @@ class EFictionMetadata:
         """
         self.ratings = self.tag_converter.convert_ratings()
         self.ratings_nonstandard = self.tag_converter.check_for_nonstandard_ratings()
-        self.categories = self.tag_converter.convert_categories()
-        self.classes = self.tag_converter.convert_classes()
+        self.categories = list(self.tag_converter.convert_categories())
+        self.categories += list(self.tag_converter.convert_warnings())
+        self.classes = list(self.tag_converter.convert_classes())
+        self.classes += list(self.tag_converter.convert_genres())
 
         old_characters = self.sql.read_table_to_dict(self.working_original, "characters")
         self.characters = self._convert_characters(old_characters)
