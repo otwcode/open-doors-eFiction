@@ -16,7 +16,7 @@ class EFictionSimplified:
     # EFiction names its tables as xxxxx_tablename and we only need to keep a few to process the archive
     tables_to_keep = (
         "authors", "categories", "challenges", "chapters", "characters", "classes", "classtypes", "coauthors",
-        "inseries", "ratings", "series", "stories")
+        "inseries", "ratings", "series", "stories", "warnings", "genres")
 
     def __init__(self, config: ConfigParser, logger: Logger, sql: SqlDb):
         self.sql = sql
