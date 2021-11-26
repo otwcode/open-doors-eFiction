@@ -15,19 +15,43 @@ class TagConverter:
         self.working_original = self.config['Processing']['simplified_original_db']
         self.working_open_doors = self.config['Processing']['open_doors_working_db']
 
-    def check_for_nonstandard_ratings(self) -> bool:
+    def check_for_nonstandard_tag_tables(self) -> bool:
         """
-        Determine whether or not the eFiction ratings table correctly uses rating
-        IDs, or if it is 'non-standard' from using rating names as identifiers
+        Determine whether or not the given eFiction tag table correctly uses IDs,
+        or if it is 'non-standard' from using tag names as identifiers
         :return: True if non-standard, otherwise False
         """
 
-        count: List[Dict[str, int]] = self.sql.execute_and_fetchall(self.working_original,
-                                                                    "SELECT count(*) as cnt FROM stories WHERE rid NOT IN"
-                                                                    "(SELECT rid FROM ratings)")
+        tag_tables = {}
 
-        return bool(count and count[0]['cnt'] > 0)
+        for tag_table_name in ['rating', 'categories', 'warnings', 'classes', 'genres', 'characters']:
+            original_name = tag_table_name
 
+            if tag_table_name == 'rating':
+                tag_table_name = 'ratings'
+                id_name = 'rid'
+            elif tag_table_name == 'categories':
+                id_name = 'catid'
+            elif tag_table_name == 'warnings':
+                id_name = 'wid'
+            elif tag_table_name == 'classes':
+                id_name = 'classes'
+            elif tag_table_name == 'genres':
+                id_name = 'gid'
+            elif tag_table_name == 'characters':
+                id_name = 'charid'
+
+            query = f"SELECT count(*) as cnt FROM stories WHERE {id_name} NOT IN (SELECT {id_name} FROM {tag_table_name});"
+
+            try:
+                count: List[Dict[str, int]] = self.sql.execute_and_fetchall(self.working_original, query)
+                tag_tables[original_name] = bool(count and count[0]['cnt'] > 0)
+            except Exception as e:
+                self.logger.info(e)
+                self.logger.info("No such table?")
+                tag_tables[original_name] = 0
+
+        return tag_tables
 
 
     def convert_ratings(self):

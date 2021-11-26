@@ -28,11 +28,8 @@ class EFictionMetadata:
         self.working_open_doors = self.config['Processing']['open_doors_working_db']
         self.tag_converter = TagConverter(config, logger, sql)
         self.authors = []
-        self.ratings = []
-        self.ratings_nonstandard: bool = False
-        self.categories = []
-        self.classes = []
-        self.characters = []
+        self.tag_tables = {}
+        self.tag_tables_is_standard = {}
 
     def create_open_doors_db(self, step_path):
         """
@@ -101,7 +98,7 @@ class EFictionMetadata:
             self.sql
         )
         for old_character in old_characters:
-            parent = [ct['original_tag'] for ct in self.categories if ct['original_tagid'] == old_character['catid']]
+            parent = [ct['original_tag'] for ct in self.tag_tables['categories'] if ct['original_tagid'] == old_character['catid']]
             new_tag = {
                 'id': old_character['charid'],
                 'name': old_character['charname'],
@@ -113,27 +110,34 @@ class EFictionMetadata:
         return self.sql.execute_and_fetchall(self.working_open_doors,
                                              "SELECT * FROM tags WHERE `original_type` = 'character'")
 
+    def _convert_story_tag_table(self, table_name, old_tags):
+        # Standard for tag table to be organized by id.
+        original_tagid = 'original_tagid'
+        if self.tag_table_is_standard[table_name]:
+            # Tag table identified by name rather than id.
+            original_tagid = 'original_tag'
+        return [c['id'] for c in self.tag_tables[table_name] if str(c[original_tagid]) in old_tags[table_name]]
+
     def _convert_story_tags(self, old_story):
         old_tags = {
             'rating': key_find('rid', old_story, '').split(','),
             'categories': key_find('catid', old_story, '').split(','),
+            'warnings': key_find('wid', old_story, '').split(','),
             'classes': key_find('classes', old_story, '').split(','),
+            'genres': key_find('gid', old_story, '').split(','),
             'characters': key_find('charid', old_story, '').split(',')
         }
 
-        if self.ratings_nonstandard:
-            ratings = [r['id'] for r in self.ratings if str(r['original_tag']) in old_tags['rating']]
-        else:
-            ratings = [r['id'] for r in self.ratings if str(r['original_tagid']) in old_tags['rating']]
-        categories = [c['id'] for c in self.categories if str(c['original_tagid']) in old_tags['categories']]
-        classes = [c['id'] for c in self.classes if str(c['original_tagid']) in old_tags['classes']]
-        characters = [c['id'] for c in self.classes if str(c['original_tagid']) in old_tags['characters']]
+        new_tags = {}
+
+        for tag_table_name in self.tag_tables.keys():
+            new_tags[tag_table_name] = self._convert_story_tag_table(tag_table_name, old_tags)
 
         return {
-            'rating': ratings,
-            'categories': categories,
-            'classes': classes,
-            'characters': characters
+            'rating': new_tags['rating'],
+            'categories': new_tags['categories'] + new_tags['warnings'],
+            'classes': new_tags['classes'] + new_tags['genres'],
+            'characters': new_tags['characters']
         }
 
     def _convert_tags_join(self, new_story, tags, sql=None):
@@ -161,7 +165,11 @@ class EFictionMetadata:
         # access the coauthors table using the story ID
         full_query = f"""SELECT * FROM coauthors WHERE sid = {new_story['id']};"""
         # get a dict of coauthor IDs for the story
-        authors = sql.execute_and_fetchall(self.working_original, full_query)
+        try:
+            authors = sql.execute_and_fetchall(self.working_original, full_query)
+        except Exception as e:
+            authors = None
+            self.logger.info("No coauthors table...")
         # We only try to operate on this result if it is not None
         if authors:
             for author in authors:
@@ -226,15 +234,16 @@ class EFictionMetadata:
         """
         Extract all tags by category.
         """
-        self.ratings = self.tag_converter.convert_ratings()
-        self.ratings_nonstandard = self.tag_converter.check_for_nonstandard_ratings()
-        self.categories = list(self.tag_converter.convert_categories())
-        self.categories += list(self.tag_converter.convert_warnings())
-        self.classes = list(self.tag_converter.convert_classes())
-        self.classes += list(self.tag_converter.convert_genres())
+        self.tag_tables['rating'] = self.tag_converter.convert_ratings()
+        self.tag_tables['categories'] = self.tag_converter.convert_categories()
+        self.tag_tables['warnings'] = self.tag_converter.convert_warnings()
+        self.tag_tables['classes'] = self.tag_converter.convert_classes()
+        self.tag_tables['genres'] = self.tag_converter.convert_genres()
 
         old_characters = self.sql.read_table_to_dict(self.working_original, "characters")
-        self.characters = self._convert_characters(old_characters)
+        self.tag_tables['characters'] = self._convert_characters(old_characters)
+
+        self.tag_table_is_standard = self.tag_converter.check_for_nonstandard_tag_tables()
 
     def convert_original_to_open_doors(self, step_path: str):
         """
