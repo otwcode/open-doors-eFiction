@@ -47,10 +47,11 @@ class TagConverter:
                     id_name = 'charid'
 
                 try:
-                    query = f"SELECT {id_name} FROM stories WHERE {id_name} NOT IN (SELECT {id_name} FROM {tag_table_name});"
+                    query = f"SELECT {id_name} FROM stories;"
                     tags = self.sql.execute_and_fetchall(self.working_original, query)
                     try:
-                        int(''.join(map(lambda story_tags: story_tags[id_name].replace(',', ''), tags)))
+                        tags = list(map(lambda story_tags: story_tags[id_name].replace(',', ''), tags))
+                        int(''.join(tags))
                         tag_tables[tag_table_name] = False
                     except Exception as e:
                         # Non-integer in identifier
