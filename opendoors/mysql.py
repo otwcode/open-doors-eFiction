@@ -70,8 +70,12 @@ class SqlDb:
         :return: The contents of the table as a dict.
         """
         cursor = self.conn.cursor()
-        cursor.execute(f"SELECT * FROM {database}.{tablename};")
-        return cursor.fetchall()
+        try:
+            cursor.execute(f"SELECT * FROM {database}.{tablename};")
+            return cursor.fetchall()
+        except Exception as e:
+            self.logger.info(f"No table {tablename} in {database}...")
+            return []
 
     def read_table_with_total(self, database: str, table_name: str):
         """
