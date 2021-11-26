@@ -28,8 +28,15 @@ class EFictionMetadata:
         self.working_open_doors = self.config['Processing']['open_doors_working_db']
         self.tag_converter = TagConverter(config, logger, sql)
         self.authors = []
-        self.tag_tables = {}
-        self.tag_tables_is_standard = {}
+        self.tag_tables = {
+            'rating': None,
+            'categories': None,
+            'warnings': None,
+            'classes': None,
+            'genres': None,
+            'characters': None
+        }
+        self.tag_tables_is_nonstandard = {}
 
     def create_open_doors_db(self, step_path):
         """
@@ -97,6 +104,8 @@ class EFictionMetadata:
             ["original_tagid", "original_tag", "original_type", "original_parent"],
             self.sql
         )
+        if self.tag_tables['categories'] is None:
+            self.tag_tables['categories'] = self.tag_converter.convert_categories()
         for old_character in old_characters:
             parent = [ct['original_tag'] for ct in self.tag_tables['categories'] if ct['original_tagid'] == old_character['catid']]
             new_tag = {
@@ -113,7 +122,7 @@ class EFictionMetadata:
     def _convert_story_tag_table(self, table_name, old_tags):
         # Standard for tag table to be organized by id.
         original_tagid = 'original_tagid'
-        if self.tag_table_is_standard[table_name]:
+        if self.tag_table_is_nonstandard[table_name]:
             # Tag table identified by name rather than id.
             original_tagid = 'original_tag'
         return [c['id'] for c in self.tag_tables[table_name] if str(c[original_tagid]) in old_tags[table_name]]
@@ -243,7 +252,7 @@ class EFictionMetadata:
         old_characters = self.sql.read_table_to_dict(self.working_original, "characters")
         self.tag_tables['characters'] = self._convert_characters(old_characters)
 
-        self.tag_table_is_standard = self.tag_converter.check_for_nonstandard_tag_tables()
+        self.tag_table_is_nonstandard = self.tag_converter.check_for_nonstandard_tag_tables()
 
     def convert_original_to_open_doors(self, step_path: str):
         """

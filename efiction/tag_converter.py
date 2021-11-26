@@ -25,31 +25,40 @@ class TagConverter:
         tag_tables = {}
 
         for tag_table_name in ['rating', 'categories', 'warnings', 'classes', 'genres', 'characters']:
-            original_name = tag_table_name
 
             if tag_table_name == 'rating':
-                tag_table_name = 'ratings'
-                id_name = 'rid'
-            elif tag_table_name == 'categories':
-                id_name = 'catid'
-            elif tag_table_name == 'warnings':
-                id_name = 'wid'
-            elif tag_table_name == 'classes':
-                id_name = 'classes'
-            elif tag_table_name == 'genres':
-                id_name = 'gid'
-            elif tag_table_name == 'characters':
-                id_name = 'charid'
-
-            query = f"SELECT count(*) as cnt FROM stories WHERE {id_name} NOT IN (SELECT {id_name} FROM {tag_table_name});"
-
-            try:
+                # Only one rating per story, so story rating should be single number
+                # that exactly matches rating id
+                query = f"SELECT count(*) as cnt FROM stories WHERE rid NOT IN (SELECT rid FROM ratings);"
                 count: List[Dict[str, int]] = self.sql.execute_and_fetchall(self.working_original, query)
-                tag_tables[original_name] = bool(count and count[0]['cnt'] > 0)
-            except Exception as e:
-                self.logger.info(e)
-                self.logger.info("No such table?")
-                tag_tables[original_name] = 0
+                tag_tables['rating'] = bool(count and count[0]['cnt'] > 0)
+            else:
+                # Rough check: ensure all identifiers for tag table are integers
+
+                if tag_table_name == 'categories':
+                    id_name = 'catid'
+                elif tag_table_name == 'warnings':
+                    id_name = 'wid'
+                elif tag_table_name == 'classes':
+                    id_name = 'classes'
+                elif tag_table_name == 'genres':
+                    id_name = 'gid'
+                elif tag_table_name == 'characters':
+                    id_name = 'charid'
+
+                try:
+                    query = f"SELECT {id_name} FROM stories WHERE {id_name} NOT IN (SELECT {id_name} FROM {tag_table_name});"
+                    tags = self.sql.execute_and_fetchall(self.working_original, query)
+                    try:
+                        int(''.join(map(lambda story_tags: story_tags[id_name].replace(',', ''), tags)))
+                        tag_tables[tag_table_name] = False
+                    except Exception as e:
+                        # Non-integer in identifier
+                        tag_tables[tag_table_name] = True
+                except Exception as e:
+                    self.logger.info(e)
+                    self.logger.info("No such table?")
+                    tag_tables[tag_table_name] = None
 
         return tag_tables
 
@@ -101,26 +110,26 @@ class TagConverter:
 
     def convert_warnings(self):
         """
-        Convert the eFiction categories table to Open Doors tags.
-        :return: Open Doors tags with the original type "categories"
+        Convert the eFiction warnings table to Open Doors tags.
+        :return: Open Doors tags with the original type "warnings"
         """
-        old_categories, current, total = self.sql.read_table_with_total(self.working_original, "warnings")
-        for old_category in old_categories:
+        old_warnings, current, total = self.sql.read_table_with_total(self.working_original, "warnings")
+        for old_warning in old_warnings:
             new_tag = {
-                'id': old_category['wid'],
+                'id': old_warning['wid'],
                 'parent': "",
-                'name': old_category['warning'],
-                'description': old_category['warning']
+                'name': old_warning['warning'],
+                'description': old_warning['warning']
             }
             query = f"""
             INSERT INTO tags 
                 (`original_tagid`, `original_tag`, `original_type`, `original_description`, `original_parent`)
-            VALUES {new_tag['id'], new_tag['name'], 'category', new_tag['description'], new_tag['parent']};
+            VALUES {new_tag['id'], new_tag['name'], 'warning', new_tag['description'], new_tag['parent']};
             """
             self.sql.execute(self.working_open_doors, query)
-            current = print_progress(current, total, "categories converted")
+            current = print_progress(current, total, "warnings converted")
         return self.sql.execute_and_fetchall(self.working_open_doors,
-                                             "SELECT * FROM tags WHERE `original_type` = 'category'")
+                                             "SELECT * FROM tags WHERE `original_type` = 'warning'")
 
     def convert_classes(self):
         """
@@ -148,22 +157,22 @@ class TagConverter:
 
     def convert_genres(self):
         """
-        Convert the eFiction classes table to Open Doors tags.
-        :return: Open Doors tags with the original type "class"
+        Convert the eFiction genres table to Open Doors tags.
+        :return: Open Doors tags with the original type "genre"
         """
-        old_classes, current, total = self.sql.read_table_with_total(self.working_original, "genres")
-        for old_class in old_classes:
+        old_genres, current, total = self.sql.read_table_with_total(self.working_original, "genres")
+        for old_genre in old_genres:
             new_tag = {
-                'id': old_class['gid'],
-                'name': old_class['genre'],
+                'id': old_genre['gid'],
+                'name': old_genre['genre'],
                 'parent': ""
             }
             query = f"""
             INSERT INTO tags 
                 (`original_tagid`, `original_tag`, `original_type`, `original_parent`)
-            VALUES {new_tag['id'], new_tag['name'], 'class', new_tag['parent']};
+            VALUES {new_tag['id'], new_tag['name'], 'genre', new_tag['parent']};
             """
             self.sql.execute(self.working_open_doors, query)
-            current = print_progress(current, total, "classes converted")
+            current = print_progress(current, total, "genres converted")
         return self.sql.execute_and_fetchall(self.working_open_doors,
-                                             "SELECT * FROM tags WHERE `original_type` = 'class'")
+                                             "SELECT * FROM tags WHERE `original_type` = 'genre'")
