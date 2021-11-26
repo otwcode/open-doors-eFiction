@@ -127,7 +127,7 @@ class EFictionMetadata:
             ratings = [r['id'] for r in self.ratings if str(r['original_tagid']) in old_tags['rating']]
         categories = [c['id'] for c in self.categories if str(c['original_tagid']) in old_tags['categories']]
         classes = [c['id'] for c in self.classes if str(c['original_tagid']) in old_tags['classes']]
-        characters = [c['id'] for c in self.classes if str(c['original_tagid']) in old_tags['characters']]
+        characters = [c['id'] for c in self.characters if str(c['original_tagid']) in old_tags['characters']]
 
         return {
             'rating': ratings,
