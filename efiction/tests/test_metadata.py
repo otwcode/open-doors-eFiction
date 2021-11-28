@@ -86,7 +86,7 @@ class TestEFictionConverter(TestCase):
         result = self.efiction_converter._convert_story_tags(old_stories[0])
         self.assertEqual({
             'categories': [6],
-            'characters': [68, 69],
+            'characters': [106, 107],
             'classes': [70, 77, 83, 94],
             'rating': [3]
         }, result)
@@ -111,7 +111,7 @@ class TestEFictionConverter(TestCase):
              'uid': 2, 'coauthors': None, 'featured': '', 'validated': '1', 'completed': '1', 'rr': '',
              'wordcount': 3992, 'rating': 0, 'reviews': 2, 'count': 2872, 'challenges': '0'}]
         result = efiction_converter_string_ratings._convert_story_tags(old_stories[0])
-        self.assertEqual({'categories': [6], 'characters': [7], 'classes': [], 'rating': [3]}, result)
+        self.assertEqual({'categories': [6], 'characters': [8], 'classes': [], 'rating': [3]}, result)
         # Remove test files created during this test
         remove_output_files('efiction/tests/test_output')
 
