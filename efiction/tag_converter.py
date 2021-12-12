@@ -15,19 +15,53 @@ class TagConverter:
         self.working_original = self.config['Processing']['simplified_original_db']
         self.working_open_doors = self.config['Processing']['open_doors_working_db']
 
-    def check_for_nonstandard_ratings(self) -> bool:
+    def check_for_nonstandard_tag_tables(self) -> bool:
         """
-        Determine whether or not the eFiction ratings table correctly uses rating
-        IDs, or if it is 'non-standard' from using rating names as identifiers
+        Determine whether or not the given eFiction tag table correctly uses IDs,
+        or if it is 'non-standard' from using tag names as identifiers
         :return: True if non-standard, otherwise False
         """
 
-        count: List[Dict[str, int]] = self.sql.execute_and_fetchall(self.working_original,
-                                                                    "SELECT count(*) as cnt FROM stories WHERE rid NOT IN"
-                                                                    "(SELECT rid FROM ratings)")
+        tag_tables = {}
 
-        return bool(count and count[0]['cnt'] > 0)
+        for tag_table_name in ['rating', 'categories', 'warnings', 'classes', 'genres', 'characters']:
 
+            if tag_table_name == 'rating':
+                # Only one rating per story, so story rating should be single number
+                # that exactly matches rating id
+                query = f"SELECT count(*) as cnt FROM stories WHERE rid NOT IN (SELECT rid FROM ratings);"
+                count: List[Dict[str, int]] = self.sql.execute_and_fetchall(self.working_original, query)
+                tag_tables['rating'] = bool(count and count[0]['cnt'] > 0)
+            else:
+                # Rough check: ensure all identifiers for tag table are integers
+
+                if tag_table_name == 'categories':
+                    id_name = 'catid'
+                elif tag_table_name == 'warnings':
+                    id_name = 'wid'
+                elif tag_table_name == 'classes':
+                    id_name = 'classes'
+                elif tag_table_name == 'genres':
+                    id_name = 'gid'
+                elif tag_table_name == 'characters':
+                    id_name = 'charid'
+
+                try:
+                    query = f"SELECT {id_name} FROM stories;"
+                    tags = self.sql.execute_and_fetchall(self.working_original, query)
+                    try:
+                        tags = list(map(lambda story_tags: story_tags[id_name].replace(',', ''), tags))
+                        int(''.join(tags))
+                        tag_tables[tag_table_name] = False
+                    except Exception as e:
+                        # Non-integer in identifier
+                        tag_tables[tag_table_name] = True
+                except Exception as e:
+                    self.logger.info(e)
+                    self.logger.info("No such table?")
+                    tag_tables[tag_table_name] = None
+
+        return tag_tables
 
 
     def convert_ratings(self):
@@ -75,6 +109,29 @@ class TagConverter:
         return self.sql.execute_and_fetchall(self.working_open_doors,
                                              "SELECT * FROM tags WHERE `original_type` = 'category'")
 
+    def convert_warnings(self):
+        """
+        Convert the eFiction warnings table to Open Doors tags.
+        :return: Open Doors tags with the original type "warnings"
+        """
+        old_warnings, current, total = self.sql.read_table_with_total(self.working_original, "warnings")
+        for old_warning in old_warnings:
+            new_tag = {
+                'id': old_warning['wid'],
+                'parent': "",
+                'name': old_warning['warning'],
+                'description': old_warning['warning']
+            }
+            query = f"""
+            INSERT INTO tags 
+                (`original_tagid`, `original_tag`, `original_type`, `original_description`, `original_parent`)
+            VALUES {new_tag['id'], new_tag['name'], 'warning', new_tag['description'], new_tag['parent']};
+            """
+            self.sql.execute(self.working_open_doors, query)
+            current = print_progress(current, total, "warnings converted")
+        return self.sql.execute_and_fetchall(self.working_open_doors,
+                                             "SELECT * FROM tags WHERE `original_type` = 'warning'")
+
     def convert_classes(self):
         """
         Convert the eFiction classes table to Open Doors tags.
@@ -98,3 +155,25 @@ class TagConverter:
             current = print_progress(current, total, "classes converted")
         return self.sql.execute_and_fetchall(self.working_open_doors,
                                              "SELECT * FROM tags WHERE `original_type` = 'class'")
+
+    def convert_genres(self):
+        """
+        Convert the eFiction genres table to Open Doors tags.
+        :return: Open Doors tags with the original type "genre"
+        """
+        old_genres, current, total = self.sql.read_table_with_total(self.working_original, "genres")
+        for old_genre in old_genres:
+            new_tag = {
+                'id': old_genre['gid'],
+                'name': old_genre['genre'],
+                'parent': ""
+            }
+            query = f"""
+            INSERT INTO tags 
+                (`original_tagid`, `original_tag`, `original_type`, `original_parent`)
+            VALUES {new_tag['id'], new_tag['name'], 'genre', new_tag['parent']};
+            """
+            self.sql.execute(self.working_open_doors, query)
+            current = print_progress(current, total, "genres converted")
+        return self.sql.execute_and_fetchall(self.working_open_doors,
+                                             "SELECT * FROM tags WHERE `original_type` = 'genre'")
