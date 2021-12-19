@@ -1,5 +1,6 @@
 import os
 import chardet
+import shutil
 from configparser import ConfigParser
 from logging import Logger
 from pathlib import Path
@@ -46,7 +47,7 @@ class EFictionChapters:
         :param chapter_paths: List of chapter metadata including path, author id and chapter id
         :return:
         """
-        warnings = []
+        warnings = 0
         self.logger.info("...loading data from chapters table...")
         old_chapters, current, total = self.sql.read_table_with_total(self.working_original, "chapters")
 
@@ -60,6 +61,43 @@ class EFictionChapters:
                 ["id", "position", "title", "text", "story_id", "notes"],
                 self.sql
             )
+        try:
+            encoding = self.config['Archive']['encoding']
+        except KeyError:
+            encoding = None
+        if encoding is None:
+            message_string = """
+You have not specified any character encoding in the config file! 
+
+If you are unsure which encoding is used in the backup 
+""".strip() + (
+    f""", please run the mojibake tool:
+
+    mojibake {self.config['Archive']['chapter_path']}
+
+    """ if shutil.which('mojibake') is not None else f"""
+, you can install the
+mojibake tool from it's repository:
+
+    https://github.com/otwcode/open-doors-mojibake
+
+follow the instructions in readme and then run it with this command:
+
+    mojibake {self.config['Archive']['chapter_path']}
+
+    """.strip()
+)
+            print(message_string)
+            while encoding is None:
+                encoding_text = input("Enter a valid encoding (press enter for utf8): ")
+                if encoding_text == "":
+                    encoding_text = 'utf8'
+                try:
+                    # check if encoding is valid
+                    ''.encode(encoding_text)
+                    encoding = encoding_text
+                except:
+                    print(f"{encoding_text} is not a valid encoding, try again")
         for old_chapter in old_chapters:
             chapid = old_chapter['chapid']
             chapter = [chapter_path for chapter_path in chapter_paths if chapter_path['chap_id'] == str(chapid)]
@@ -67,17 +105,12 @@ class EFictionChapters:
                 file = chapter[0]['path']
                 with open(file, 'rb') as raw_chapter:
                     raw = raw_chapter.read()
-                    encoding = chardet.detect(raw)
-                    if encoding['confidence'] < 0.7:
-                        warnings.append(
-                            f"Low confidence in {encoding['encoding']} in file {chapter_path}: {round(encoding['confidence'] * 100)}%"
-                        )
                     while isinstance(raw, bytes):
                         try:
-                            raw = raw.decode(encoding=encoding['encoding'])
+                            raw = raw.decode(encoding=encoding)
                         except UnicodeDecodeError as e:
                             error = f"Failed to decode {file}\n"
-                            line_num = raw[:e.start].decode(encoding['encoding']).count("\n")
+                            line_num = raw[:e.start].decode(encoding).count("\n")
                             error += f"At line {line_num}:\t{str(e)}\n"
                             error += "--\t" + str(raw[max(e.start - 40, 0):e.end + 30]) + "\n"
                             # print `^` under the offending byte
@@ -90,28 +123,12 @@ class EFictionChapters:
                             error += "++\t  " + raw[
                                                     max(e.start - 40, 0):
                                                     e.end + 30
-                                                ].decode(encoding['encoding']) \
+                                                ].decode(encoding, errors='ignore') \
                                                 .replace("\n", "\\n")          \
-                                                .replace("\r", "\\r")
-                            warnings.append(error)
+                                                .replace("\r", "\\r") + "\n"
+                            self.logger.warning(error)
+                            warnings += 1
 
-                """
-                try:
-                    with open(file, 'r', encoding="utf-8") as f:
-                        raw = f.read()
-                except UnicodeDecodeError as err:
-                    warnings.append(f"Chapter with id {chapid} contains non-ASCII characters which are not valid "
-                                    f"UTF-8. Trying Windows 1252...")
-                    try:
-                        with open(file, 'r', encoding='cp1252') as f:
-                            raw = f.read()
-                    except UnicodeDecodeError as err:
-                        warnings.append(f"Chapter with id {chapid} contains non-ASCII characters which are not valid "
-                                        f"Windows 1252. Trying Latin 1...")
-                        with open(file, 'r', encoding='latin-1') as f:
-                            raw = f.read()
-
-                """
                 text = normalize(raw)
                 if key_find('endnotes', old_chapter):
                     text = text + f"\n\n\n<hr>\n{old_chapter['endnotes']}"
@@ -125,14 +142,13 @@ class EFictionChapters:
                     old_chapter['notes']
                 )
             current = print_progress(current, total, "chapters converted")
-        insert_op.send()
         # If there were any errors, display a warning for the user to check the affected chapters
-        if warnings:
-            self.logger.warning("\n".join(warnings))
+        if warnings >= 1:
             self.logger.error(
                 make_banner('-',
-                            "There were warnings; check the affected chapters listed above to make sure curly quotes "
+                            f"There were {warnings} warnings; check the affected chapters listed above to make sure curly quotes "
                             "and accented characters are correctly displayed."))
+        insert_op.send()
         return self.sql.execute_and_fetchall(self.working_open_doors, "SELECT * FROM chapters;")
 
     def __list_chapter_files(self):
