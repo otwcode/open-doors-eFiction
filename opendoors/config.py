@@ -59,32 +59,6 @@ class ArchiveConfig:
             'done_steps': ""
         }
 
-    def create_or_get_archive_encoding(self):
-        """
-        Returns archive encoding specified in config, prompts user
-        for encoding if not specified
-        """
-        encoding = self.config.get("encoding", None)
-        if encoding is None:
-            message_string = """
-You have not specified any character encoding in the config file! 
-
-If you are unsure which encoding is used in the backup 
-""".strip() + (
-f""", please run the mojibake tool:
-
-mojibake {self.config['Archive']['chapter_path']}
-
-""" if shutil.which('mojibake') is not None else """
-, you can install the mojibake tool from
-it's repository:
-
-https://github.com/otwcode/open-doors-mojibake
-
-""".strip())
-            print(message_string)
-            input()
-
     def _create_or_get_archive_config(self):
         config = configparser.ConfigParser()
         config_path = get_full_path(self.config_path)

@@ -1,5 +1,4 @@
 import os
-import chardet
 import shutil
 from configparser import ConfigParser
 from logging import Logger
