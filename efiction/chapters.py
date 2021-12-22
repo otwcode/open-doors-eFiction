@@ -43,6 +43,7 @@ class EFictionChapters:
     def __load_chapter_text_into_db(self, chapter_paths: List[dict]):
         """
         Load chapters text from the `stories` files into the chapters table. Uses Windows 1252 if UTF-8 fails.
+        Load chapters text from the `stories` files into the chapters table. Checks for an encoding in the ini file and removes characters that are invalid in that encoding.
         :param chapter_paths: List of chapter metadata including path, author id and chapter id
         :return:
         """
