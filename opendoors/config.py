@@ -3,7 +3,6 @@ Configuration for this Archive
 """
 import configparser
 import os
-import shutil
 from logging import Logger
 
 from opendoors.utils import get_full_path

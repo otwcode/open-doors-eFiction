@@ -76,7 +76,7 @@ If you are unsure which encoding is used in the backup
 
     """ if shutil.which('mojibake') is not None else f"""
 , you can install the
-mojibake tool from it's repository:
+mojibake tool from its repository:
 
     https://github.com/otwcode/open-doors-mojibake
 
@@ -143,6 +143,8 @@ follow the instructions in readme and then run it with this command:
             current = print_progress(current, total, "chapters converted")
         # If there were any errors, display a warning for the user to check the affected chapters
         if warnings >= 1:
+            self.logger.warning("If the character deletion is unacceptable please quit this processor and use the mojibake tool,"
+                                " then restart the processor from step 04")
             self.logger.error(
                 make_banner('-',
                             f"There were {warnings} warnings; check the affected chapters listed above to make sure curly quotes "
