@@ -47,6 +47,7 @@ class EFictionChapters:
         :return:
         """
         warnings = 0
+        forced_continue = False
         self.logger.info("...loading data from chapters table...")
         old_chapters, current, total = self.sql.read_table_with_total(self.working_original, "chapters")
 
@@ -127,6 +128,23 @@ follow the instructions in readme and then run it with this command:
                                                 .replace("\r", "\\r") + "\n"
                             self.logger.warning(error)
                             warnings += 1
+                    if warnings > len(old_chapters) * .3 and not forced_continue:
+                        msg = f"""
+A total of {warnings} automatic modifications have been performed so far!
+
+It looks like something is VERY WRONG! Double check your selected character 
+encoding. If you wish to continue the process, which is not recommended, type:
+    
+                            YES, DO AS I SAY!
+
+In the prompt below, anything else will abort the process!
+                        """.strip()
+                        self.logger.error(msg)
+                        if input(">>> ").strip() == "YES, DO AS I SAY!":
+                            forced_continue = True
+                            continue
+                        else:
+                            raise Exception("Process aborted, too many errors!")
 
                 text = normalize(raw)
                 if key_find('endnotes', old_chapter):
