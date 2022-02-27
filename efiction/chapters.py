@@ -1,4 +1,5 @@
 import os
+import shutil
 from configparser import ConfigParser
 from logging import Logger
 from pathlib import Path
@@ -41,11 +42,12 @@ class EFictionChapters:
 
     def __load_chapter_text_into_db(self, chapter_paths: List[dict]):
         """
-        Load chapters text from the `stories` files into the chapters table. Uses Windows 1252 if UTF-8 fails.
+        Load chapters text from the `stories` files into the chapters table. Checks for an encoding in the ini file and removes characters that are invalid in that encoding.
         :param chapter_paths: List of chapter metadata including path, author id and chapter id
         :return:
         """
-        warnings = []
+        warnings = 0
+        forced_continue = False
         self.logger.info("...loading data from chapters table...")
         old_chapters, current, total = self.sql.read_table_with_total(self.working_original, "chapters")
 
@@ -59,25 +61,90 @@ class EFictionChapters:
                 ["id", "position", "title", "text", "story_id", "notes"],
                 self.sql
             )
+        try:
+            encoding = self.config['Archive']['encoding']
+        except KeyError:
+            encoding = None
+        if encoding is None:
+            message_string = """
+You have not specified any character encoding in the config file! 
+
+If you are unsure which encoding is used in the backup 
+""".strip() + (
+    f""", please run the mojibake tool:
+
+    mojibake {self.config['Archive']['chapter_path']}
+
+    """ if shutil.which('mojibake') is not None else f"""
+, you can install the
+mojibake tool from its repository:
+
+    https://github.com/otwcode/open-doors-mojibake
+
+follow the instructions in readme and then run it with this command:
+
+    mojibake {self.config['Archive']['chapter_path']}
+
+    """.strip()
+)
+            print(message_string)
+            while encoding is None:
+                encoding_text = input("Enter a valid encoding (press enter for utf8): ")
+                if encoding_text == "":
+                    encoding_text = 'utf8'
+                try:
+                    # check if encoding is valid
+                    ''.encode(encoding_text)
+                    encoding = encoding_text
+                except:
+                    print(f"{encoding_text} is not a valid encoding, try again")
         for old_chapter in old_chapters:
             chapid = old_chapter['chapid']
             chapter = [chapter_path for chapter_path in chapter_paths if chapter_path['chap_id'] == str(chapid)]
             if chapter:
                 file = chapter[0]['path']
-                try:
-                    with open(file, 'r', encoding="utf-8") as f:
-                        raw = f.read()
-                except UnicodeDecodeError as err:
-                    warnings.append(f"Chapter with id {chapid} contains non-ASCII characters which are not valid "
-                                    f"UTF-8. Trying Windows 1252...")
-                    try:
-                        with open(file, 'r', encoding='cp1252') as f:
-                            raw = f.read()
-                    except UnicodeDecodeError as err:
-                        warnings.append(f"Chapter with id {chapid} contains non-ASCII characters which are not valid "
-                                        f"Windows 1252. Trying Latin 1...")
-                        with open(file, 'r', encoding='latin-1') as f:
-                            raw = f.read()
+                with open(file, 'rb') as raw_chapter:
+                    raw = raw_chapter.read()
+                    while isinstance(raw, bytes):
+                        try:
+                            raw = raw.decode(encoding=encoding)
+                        except UnicodeDecodeError as e:
+                            error = f"Failed to decode {file}\n"
+                            line_num = raw[:e.start].decode(encoding).count("\n")
+                            error += f"At line {line_num}:\t{str(e)}\n"
+                            error += "--\t" + str(raw[max(e.start - 40, 0):e.end + 30]) + "\n"
+                            # print `^` under the offending byte
+                            error += "\t" + \
+                                     " " * (len(str(raw[max(e.start - 40, 0):e.start])) - 1) + \
+                                     "^" * (len(str(raw[e.start:e.end])) - 3) + "\n"
+                            error += "Will be converted to:\n"
+                            # remove the offending bytes (usually one)
+                            raw = raw[:e.start] + raw[e.end:]
+                            error += "++\t  " + raw[
+                                                    max(e.start - 40, 0):
+                                                    e.end + 30
+                                                ].decode(encoding, errors='ignore') \
+                                                .replace("\n", "\\n")          \
+                                                .replace("\r", "\\r") + "\n"
+                            self.logger.warning(error)
+                            warnings += 1
+                    if warnings > len(old_chapters) * .3 and not forced_continue:
+                        msg = f"""
+A total of {warnings} automatic modifications have been performed so far!
+
+It looks like something is VERY WRONG! Double check your selected character 
+encoding. If you wish to continue the process, which is not recommended, type:
+    
+                            YES, DO AS I SAY!
+
+In the prompt below, anything else will abort the process!
+                        """.strip()
+                        self.logger.error(msg)
+                        if input(">>> ").strip() == "YES, DO AS I SAY!":
+                            forced_continue = True
+                            continue
+                        else:
+                            raise Exception("Process aborted, too many errors!")
 
                 text = normalize(raw)
                 if key_find('endnotes', old_chapter):
@@ -92,14 +159,15 @@ class EFictionChapters:
                     old_chapter['notes']
                 )
             current = print_progress(current, total, "chapters converted")
-        insert_op.send()
         # If there were any errors, display a warning for the user to check the affected chapters
-        if warnings:
-            self.logger.warning("\n".join(warnings))
+        if warnings >= 1:
+            self.logger.warning("If the character deletion is unacceptable please quit this processor and use the mojibake tool,"
+                                " then restart the processor from step 04")
             self.logger.error(
                 make_banner('-',
-                            "There were warnings; check the affected chapters listed above to make sure curly quotes "
+                            f"There were {warnings} warnings; check the affected chapters listed above to make sure curly quotes "
                             "and accented characters are correctly displayed."))
+        insert_op.send()
         return self.sql.execute_and_fetchall(self.working_open_doors, "SELECT * FROM chapters;")
 
     def __list_chapter_files(self):

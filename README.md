@@ -77,7 +77,11 @@ This step converts the efiction tables into a new database using the Open Doors 
 
 ### Step 04 - Convert chapters
 
-This step copies the chapters from the specified location (eg /Users/myusername/Downloads/thearchivename/fiction/stories) into the chapters table of the Open Doors database created in step 03, and creates a backup in folder 04.
+This step copies the chapters from the specified location (eg /Users/myusername/Downloads/thearchivename/fiction/stories) into the chapters table of the
+Open Doors database created in step 03, and creates a backup in folder 04.
+
+If text encoding was not specified in the config file, you will be prompted to provide one. If you do not know what to enter, use the [mojibake tool](https://github.com/otwcode/open-doors-mojibake)
+to detect what text encoding was used.
 
 
 ##  Next steps
