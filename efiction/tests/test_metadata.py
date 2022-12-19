@@ -22,6 +22,7 @@ class TestEFictionConverter(TestCase):
     def tearDown(self) -> None:
         """ Remove files created during the tests """
         remove_output_files('efiction/tests/test_output')
+        remove_output_files('test_path')
 
     # Tests
     def test_for_coauthor_none(self):
