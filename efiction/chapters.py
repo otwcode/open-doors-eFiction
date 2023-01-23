@@ -40,7 +40,7 @@ class EFictionChapters:
             'author_id': subdir
         }
 
-    def __load_chapter_text_into_db(self, chapter_paths: List[dict]):
+    def load_chapter_text_into_db(self, chapter_paths: List[dict]):
         """
         Load chapters text from the `stories` files into the chapters table. Checks for an encoding in the ini file and removes characters that are invalid in that encoding.
         :param chapter_paths: List of chapter metadata including path, author id and chapter id
@@ -170,7 +170,7 @@ In the prompt below, anything else will abort the process!
         insert_op.send()
         return self.sql.execute_and_fetchall(self.working_open_doors, "SELECT * FROM chapters;")
 
-    def __list_chapter_files(self):
+    def list_chapter_files(self):
         """
         Retrieves information about the chapter files in the `stories` folder
         :return:
@@ -183,21 +183,59 @@ In the prompt below, anything else will abort the process!
                 chapter_paths.extend([self.__file_with_path(dirpath, subdir, filename) for filename in filenames])
         return chapter_paths
 
+    def load_og_chapters_into_db(self):
+        """
+        Load chapters with text from the simplified db into the chapters table
+        :return:
+        """
+        self.logger.info("...loading data from chapters table...")
+        old_chapters, current, total = self.sql.read_table_with_total(self.working_original, "chapters")
+
+        self.logger.info("...removing rows from existing chapters table...")
+        self.sql.execute(self.working_open_doors, "TRUNCATE TABLE chapters;")
+
+        self.logger.info("...loading chapters from original chapters table...")
+        insert_op = BigInsert(
+                self.working_open_doors,
+                "chapters",
+                ["id", "position", "title", "text", "story_id", "notes"],
+                self.sql
+            )
+
+        for old_chapter in old_chapters:
+            text = normalize(old_chapter['storytext'])
+            if key_find('endnotes', old_chapter):
+                text = text + f"\n\n\n<hr>\n{old_chapter['endnotes']}"
+
+            insert_op.addRow(
+                old_chapter['chapid'],
+                old_chapter['inorder'],
+                old_chapter['title'],
+                text,
+                old_chapter['sid'],
+                old_chapter['notes']
+            )
+
+            current = print_progress(current, total, "chapters converted")
+
+        insert_op.send()
+        return self.sql.execute_and_fetchall(self.working_open_doors, "SELECT * FROM chapters;")
+
     def load_chapters(self, step_path: str):
         """
         Check if chapters are already present in the database and if not, load them from the filesystem
         :return:
         """
         if self._are_chapters_in_table():
-            self.logger.info("Nothing to do: chapters are already present in the original database")
-            return True
+            self.logger.info("Chapters are already present in the original database, converting now")
+            self.load_og_chapters_into_db()
         else:
             if not self.config.has_option('Archive', 'chapter_path'):
                 chapter_path = input("Full path to chapter files\n>> ")
                 self.config['Archive']['chapter_path'] = os.path.normpath(chapter_path)
 
-            chapter_paths = self.__list_chapter_files()
-            self.__load_chapter_text_into_db(chapter_paths)
+            chapter_paths = self.list_chapter_files()
+            self.load_chapter_text_into_db(chapter_paths)
 
         database_dump = get_prefixed_path("04", step_path, f"{self.working_open_doors}.sql")
         self.logger.info(f"Exporting converted tables to {database_dump}...")
