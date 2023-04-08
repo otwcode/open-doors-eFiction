@@ -114,7 +114,7 @@ or if you installed Pytest separately, simply:
 pytest
 ```
 
-Continuous Integration is provided by GitHub Actions, configured in the `.github/workflows` folder. There are separate workflows for Linux vs MacOS and Windows because as of September 2020, the latter don't support services.
+Continuous Integration is provided by GitHub Actions, configured in the `.github/workflows` folder. There are separate workflows for GNU/Linux vs MacOS and Windows because as of September 2020, the latter don't support services.
 
 ## Known Issues
 #### "Refusing to allow an OAuth App" when pushing to GitHub
