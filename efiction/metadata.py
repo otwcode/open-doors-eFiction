@@ -129,12 +129,12 @@ class EFictionMetadata:
 
     def _convert_story_tags(self, old_story):
         old_tags = {
-            'rating': key_find('rid', old_story, '').split(','),
-            'categories': key_find('catid', old_story, '').split(','),
-            'warnings': key_find('wid', old_story, '').split(','),
-            'classes': key_find('classes', old_story, '').split(','),
-            'genres': key_find('gid', old_story, '').split(','),
-            'characters': key_find('charid', old_story, '').split(',')
+            'rating': [t.strip() for t in key_find('rid', old_story, '').split(',')],
+            'categories': [t.strip() for t in key_find('catid', old_story, '').split(',')],
+            'warnings': [t.strip() for t in key_find('wid', old_story, '').split(',')],
+            'classes': [t.strip() for t in key_find('classes', old_story, '').split(',')],
+            'genres': [t.strip() for t in key_find('gid', old_story, '').split(',')],
+            'characters': [t.strip() for t in key_find('charid', old_story, '').split(',')],
         }
 
         new_tags = {}
