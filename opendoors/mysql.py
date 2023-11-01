@@ -73,7 +73,7 @@ class SqlDb:
         try:
             cursor.execute(f"SELECT * FROM {database}.{tablename};")
             return cursor.fetchall()
-        except Exception as e:
+        except Exception:
             self.logger.info(f"No table {tablename} in {database}...")
             return []
 

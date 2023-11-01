@@ -175,7 +175,7 @@ class EFictionMetadata:
         # get a dict of coauthor IDs for the story
         try:
             authors = sql.execute_and_fetchall(self.working_original, full_query)
-        except Exception as e:
+        except Exception:
             authors = None
             self.logger.info("No coauthors table...")
         # We only try to operate on this result if it is not None

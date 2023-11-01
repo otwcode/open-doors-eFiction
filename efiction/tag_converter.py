@@ -53,7 +53,7 @@ class TagConverter:
                         tags = list(map(lambda story_tags: story_tags[id_name].replace(',', ''), tags))
                         int(''.join(tags))
                         tag_tables[tag_table_name] = False
-                    except Exception as e:
+                    except Exception:
                         # Non-integer in identifier
                         tag_tables[tag_table_name] = True
                 except Exception as e:

@@ -25,7 +25,7 @@ class TestStep02(TestCase):
                     shutil.rmtree(file)
                 else:
                     os.remove(file)
-            except PermissionError as pe:
+            except PermissionError:
                 # We don't necessarily care that much
                 continue
 
