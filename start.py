@@ -46,7 +46,7 @@ if __name__ == '__main__':
         code_name = sys.argv[1]
     else:
         code_name = None
-        while (code_name == None or any([x not in "qwertyuiopasdfghjklzxcvbnm" for x in code_name])):
+        while (code_name == None or any([x not in "qwertyuiopasdfghjklzxcvbnm" for x in code_name])):  # noqa: E711
             code_name = input(
                 "Please provide a short, lowercase code name with no spaces or punctuation for the archive "
                 "you are processing (and make a note of it as you'll need it in future!):\n>> ")

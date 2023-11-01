@@ -159,7 +159,7 @@ class SqlDb:
                     f.write(f"INSERT INTO {database}.`{str(table)}` ({column_names}) VALUES \n")
                 field_arr = []
                 for field in row:
-                    if type(row[field]) == str or type(row[field]) == datetime.datetime:
+                    if type(row[field]) == str or type(row[field]) == datetime.datetime:  # noqa: E721
                         field_arr.append(self.conn.escape(row[field]))
                     elif row[field] is None:
                         field_arr.append("NULL")
@@ -198,7 +198,7 @@ class SqlDb:
         """
         try:
             self.conn.close()
-        except:
+        except:  # noqa: E722
             pass
 
 
