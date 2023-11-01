@@ -1,4 +1,3 @@
-import os
 import re
 from configparser import ConfigParser
 from logging import Logger

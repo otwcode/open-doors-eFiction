@@ -5,10 +5,8 @@ import pytest
 
 
 from efiction.chapters import EFictionChapters
-from opendoors.big_insert import BigInsert
 from opendoors.config import ArchiveConfig
-from opendoors.mysql import SqlDb
-from opendoors.utils import get_full_path, normalize, remove_output_files
+from opendoors.utils import get_full_path, normalize
 
 
 def get_data():

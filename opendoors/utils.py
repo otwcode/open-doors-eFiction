@@ -6,7 +6,6 @@ import html
 import os
 import re
 import shutil
-import sys
 from typing import Mapping
 from pathlib import Path
 
