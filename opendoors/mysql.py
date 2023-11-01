@@ -15,35 +15,36 @@ class SqlDb:
     Wrapper and helper methods for MySQL commands
     """
 
-    def __init__(self, config: ConfigParser, logger: Logger, suppress_log: bool = False):
+    def __init__(
+        self, config: ConfigParser, logger: Logger, suppress_log: bool = False
+    ):
         self.config = config
         self.logger = logger
         self.conn = pymysql.connect(
-                **self.get_db_config(),
-                cursorclass=DictCursor,
-                local_infile=True)
+            **self.get_db_config(), cursorclass=DictCursor, local_infile=True
+        )
         if not suppress_log:
-            self.logger.info(f"Connected to MySQL database server at {self.config['Database']['host']} "
-                         f"as {self.config['Database']['user']}")
+            self.logger.info(
+                f"Connected to MySQL database server at {self.config['Database']['host']} "
+                f"as {self.config['Database']['user']}"
+            )
 
     def get_db_config(self):
         """
         Get or prompt user for MySQL connection config
         :return: MySQL connection config
         """
-        if not (self.config.has_section('Database')
-                and self.config['Database']['user']
-                and self.config['Database']['host']
-                and self.config.has_option('Database', 'password')):
+        if not (
+            self.config.has_section("Database")
+            and self.config["Database"]["user"]
+            and self.config["Database"]["host"]
+            and self.config.has_option("Database", "password")
+        ):
             host = input("MySQL host name (eg: localhost):\n>> ")
             user = input("MySQL user name (eg: root):\n>> ")
             password = input("MySQL password:\n>> ")
-            self.config['Database'] = {
-                'host': host,
-                'user': user,
-                'password': password
-            }
-        return self.config['Database']
+            self.config["Database"] = {"host": host, "user": user, "password": password}
+        return self.config["Database"]
 
     def load_sql_file_into_db(self, sql_path: str):
         """
@@ -103,7 +104,7 @@ class SqlDb:
         self.conn.commit()
         return cursor.fetchall()
 
-    def execute(self, database: str, statement: str, params: Tuple=None):
+    def execute(self, database: str, statement: str, params: Tuple = None):
         """
         Execute a statement without fetching the results.
         :param database: The database to run the statement against.
@@ -136,17 +137,19 @@ class SqlDb:
         cursor.execute("SHOW TABLES")
         tables = []
         for table in cursor.fetchall():
-            tables.append(table[f'Tables_in_{database}'])
+            tables.append(table[f"Tables_in_{database}"])
 
         for table in tables:
             f.writelines(f"\nDROP TABLE IF EXISTS {database}.`{str(table)}`;\n")
 
             cursor.execute(f"SHOW CREATE TABLE {database}.`{str(table)}`;")
-            f.writelines([str(cursor.fetchone()['Create Table']), ";\n"])
+            f.writelines([str(cursor.fetchone()["Create Table"]), ";\n"])
 
             cursor.execute(f"SHOW COLUMNS FROM {str(table)};")
             column_definitions = cursor.fetchall()
-            column_names = ", ".join([f"`{definition['Field']}`" for definition in column_definitions])
+            column_names = ", ".join(
+                [f"`{definition['Field']}`" for definition in column_definitions]
+            )
 
             cursor.execute(f"SELECT * FROM {database}.`{str(table)}`;")
             counter = 0
@@ -156,7 +159,9 @@ class SqlDb:
                     if row_group:
                         f.write(",\n".join(row_group) + ";\n")
                     row_group = []
-                    f.write(f"INSERT INTO {database}.`{str(table)}` ({column_names}) VALUES \n")
+                    f.write(
+                        f"INSERT INTO {database}.`{str(table)}` ({column_names}) VALUES \n"
+                    )
                 field_arr = []
                 for field in row:
                     if type(row[field]) == str or type(row[field]) == datetime.datetime:  # noqa: E721
@@ -191,7 +196,6 @@ class SqlDb:
             cursor.execute("SET GLOBAL local_infile=1")
         cursor.close()
 
-
     def __del__(self):
         """
         Destructor to disconnect from the database
@@ -200,5 +204,3 @@ class SqlDb:
             self.conn.close()
         except:  # noqa: E722
             pass
-
-

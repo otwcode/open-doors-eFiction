@@ -12,6 +12,7 @@ class ArchiveConfig:
     """
     Wrapper for ConfigParser to provide convenience methods for configuration
     """
+
     def __init__(self, logger: Logger, code_name: str, working_dir: str):
         self.logger = logger
         self.working_dir = working_dir
@@ -32,30 +33,34 @@ class ArchiveConfig:
         # Write out the new config file
         with open(self.config_path, "w") as configfile:
             self.config.write(configfile)
-            self.logger.info("Successfully created configuration file {}.".format(self.config_path))
+            self.logger.info(
+                "Successfully created configuration file {}.".format(self.config_path)
+            )
         return self.config
 
     def _set_archive_config(self):
         """
         Set Archive name and type
         """
-        archive_name = input("Full archive name (eg: 'TER/MA', 'West Wing Fanfiction Archive') - this will be used to "
-                             "generate dummy emails\n>> ")
-        self.config['Archive'] = {
-            'archive_name': archive_name,
-            'archive_type': 'EF',
-            'code_name': self.code_name
+        archive_name = input(
+            "Full archive name (eg: 'TER/MA', 'West Wing Fanfiction Archive') - this will be used to "
+            "generate dummy emails\n>> "
+        )
+        self.config["Archive"] = {
+            "archive_name": archive_name,
+            "archive_type": "EF",
+            "code_name": self.code_name,
         }
 
     def _set_processing_config(self):
         """
         Set Processing settings
         """
-        self.config['Processing'] = {
-            'code_name': self.code_name,
-            'working_dir': self.working_dir,
-            'next_step': "01",
-            'done_steps': ""
+        self.config["Processing"] = {
+            "code_name": self.code_name,
+            "working_dir": self.working_dir,
+            "next_step": "01",
+            "done_steps": "",
         }
 
     def _create_or_get_archive_config(self):
@@ -74,15 +79,15 @@ class ArchiveConfig:
         :param key: Configuration key to look up.
         :return: The value of the specified key.
         """
-        return self.config['Processing'][key]
+        return self.config["Processing"][key]
 
     def archive(self, key):
         """
-         Return value of the specified key from the Archive section in the ini file.
-         :param key: Configuration key to look up.
-         :return: The value of the specified key.
-         """
-        return self.config['Archive'][key]
+        Return value of the specified key from the Archive section in the ini file.
+        :param key: Configuration key to look up.
+        :return: The value of the specified key.
+        """
+        return self.config["Archive"][key]
 
     def save(self):
         """
@@ -90,11 +95,13 @@ class ArchiveConfig:
         :return: 0 if there is no config to save
         """
         if len(self.config.keys()) != 0:
-            backup_path = os.path.join(self.processing('working_dir'), os.path.basename(self.config_path))
-            with open(backup_path, 'w') as backup_config:
+            backup_path = os.path.join(
+                self.processing("working_dir"), os.path.basename(self.config_path)
+            )
+            with open(backup_path, "w") as backup_config:
                 self.config.write(backup_config)
 
-            with open(self.config_path, 'w') as configfile:
+            with open(self.config_path, "w") as configfile:
                 self.config.write(configfile)
         else:
             return None

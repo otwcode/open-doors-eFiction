@@ -17,8 +17,12 @@ test_config = ArchiveConfig(MagicMock(), "test", "steps/tests/test_data").config
 
 class TestStep02(TestCase):
     def tearDown(self) -> None:
-        """ Remove any files generated in test_output """
-        filtered = [f for f in glob.glob('steps/tests/test_output/*') if not re.match(r'\.keep', f)]
+        """Remove any files generated in test_output"""
+        filtered = [
+            f
+            for f in glob.glob("steps/tests/test_output/*")
+            if not re.match(r"\.keep", f)
+        ]
         for file in filtered:
             try:
                 if Path(file).is_dir():

@@ -11,6 +11,7 @@ from pathlib import Path
 
 import unicodedata
 
+
 def get_full_path(path):
     """
     Return the absolute path based on the supplied fragment
@@ -43,7 +44,10 @@ def check_if_file_exists(config, section, option):
     """
     return config.has_option(section, option) and Path(config[section][option]).exists
 
-def key_find(needle: object, haystack: Mapping[object, object], none_val: object = None) -> object:
+
+def key_find(
+    needle: object, haystack: Mapping[object, object], none_val: object = None
+) -> object:
     """
     Helper function to search a Dict (or any Mappable type) for a key, returning
     the value if it exists. This avoids KeyErrors when it is not certain if the key
@@ -59,6 +63,7 @@ def key_find(needle: object, haystack: Mapping[object, object], none_val: object
         return haystack[needle]
     return none_val
 
+
 def make_banner(border_char: chr, banner_text: str, padding=2):
     """
     Make a banner with the provided text bordered by the provided character
@@ -69,9 +74,11 @@ def make_banner(border_char: chr, banner_text: str, padding=2):
     """
     width = len(banner_text) + (padding * 2)
     banner_border = border_char.ljust(width, border_char)
-    return f"\n{banner_border}\n" \
-           f"{' ' * padding}{banner_text}{' ' * padding}\n" \
-           f"{banner_border}"
+    return (
+        f"\n{banner_border}\n"
+        f"{' ' * padding}{banner_text}{' ' * padding}\n"
+        f"{banner_border}"
+    )
 
 
 def set_working_dir(path=None, code_name=""):
@@ -84,8 +91,10 @@ def set_working_dir(path=None, code_name=""):
     """
     if path is None:
         _working_dir = os.path.join(os.path.expanduser("~"), "otw_opendoors", code_name)
-        prompt = input("Path to working directory to use for this archive "
-                       "(press Enter for default: {}):\n>> ".format(_working_dir))
+        prompt = input(
+            "Path to working directory to use for this archive "
+            "(press Enter for default: {}):\n>> ".format(_working_dir)
+        )
         if prompt != "":
             _working_dir = prompt
     else:
@@ -116,7 +125,8 @@ def print_progress(current, total, text="stories"):
     """
     current += 1
     import sys
-    sys.stdout.write(f'\r{current}/{total} {text}')
+
+    sys.stdout.write(f"\r{current}/{total} {text}")
     if current >= total:
         sys.stdout.write("\n")
     sys.stdout.flush()
@@ -128,7 +138,7 @@ def remove_output_files(path: str):
     Remove all files and folders in a path - mainly useful for test cleanup
     :param path: the path to tidy up, relative to the root of the project
     """
-    filtered = [f for f in glob.glob(path) if not re.match(r'\.keep', f)]
+    filtered = [f for f in glob.glob(path) if not re.match(r"\.keep", f)]
     for file in filtered:
         try:
             if Path(file).is_dir():
@@ -146,9 +156,10 @@ def normalize(text):
     :param text: the text to normalize
     :return: normalized, unescaped text
     """
-    return unicodedata.normalize("NFKD", html.unescape(text) or '').strip()
+    return unicodedata.normalize("NFKD", html.unescape(text) or "").strip()
 
-def get_prefixed_path(step: str, path: str, filename: str=""):
+
+def get_prefixed_path(step: str, path: str, filename: str = ""):
     """
     Adds the efiction step prefix to filenames or folders
     :param step: The current step

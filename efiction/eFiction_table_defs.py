@@ -5,8 +5,7 @@ table names are replaced on the fly as the prefix may vary in different eFiction
 import re
 
 table_definitions = {
-    'authorfields':
-        """CREATE TABLE `{0}` (
+    "authorfields": """CREATE TABLE `{0}` (
            `field_id`       int(11)      NOT NULL AUTO_INCREMENT,
            `field_type`     tinyint(4)   NOT NULL DEFAULT '0',
            `field_name`     varchar(30)  NOT NULL DEFAULT ' ',
@@ -17,16 +16,14 @@ table_definitions = {
            `field_on`       tinyint(1)   NOT NULL DEFAULT '0',
            PRIMARY KEY (`field_id`)
             ) ENGINE = MyISAM;""",
-    'authorinfo':
-        """CREATE TABLE `{0}` (
+    "authorinfo": """CREATE TABLE `{0}` (
           `uid`   int(11)      NOT NULL DEFAULT '0',
           `field` int(11)      NOT NULL DEFAULT '0',
           `info`  varchar(255) NOT NULL DEFAULT ' ',
           PRIMARY KEY (`uid`, `field`),
           KEY `uid` (`uid`)
           ) ENGINE = MyISAM;""",
-    'authorprefs':
-        """CREATE TABLE `{0}` (
+    "authorprefs": """CREATE TABLE `{0}` (
             `uid`        int(11)      NOT NULL DEFAULT '0',
             `newreviews` tinyint(1)   NOT NULL DEFAULT '0',
             `newrespond` tinyint(1)   NOT NULL DEFAULT '0',
@@ -43,8 +40,7 @@ table_definitions = {
             `stories`    int(11)      NOT NULL DEFAULT '0',
             PRIMARY KEY (`uid`)
         ) ENGINE = MyISAM""",
-    'authors':
-        """CREATE TABLE `{0}` (
+    "authors": """CREATE TABLE `{0}` (
           `uid` int(11) NOT NULL AUTO_INCREMENT,
           `penname` varchar(200) NOT NULL DEFAULT '',
           `realname` varchar(200) NOT NULL DEFAULT '',
@@ -57,8 +53,7 @@ table_definitions = {
           `password` varchar(40) NOT NULL DEFAULT '0',
           PRIMARY KEY (`uid`)
         ) ENGINE=MyISAM;""",
-    'blocks':
-        """CREATE TABLE `{0}` (
+    "blocks": """CREATE TABLE `{0}` (
             `block_id`        int(11)      NOT NULL AUTO_INCREMENT,
             `block_name`      varchar(30)  NOT NULL DEFAULT '',
             `block_title`     varchar(150) NOT NULL DEFAULT '',
@@ -68,8 +63,7 @@ table_definitions = {
             PRIMARY KEY (`block_id`),
             KEY `block_name` (`block_name`)
         ) ENGINE = MyISAM;""",
-    'categories':
-        """CREATE TABLE `{0}` (
+    "categories": """CREATE TABLE `{0}` (
           `catid` int(11) NOT NULL AUTO_INCREMENT,
           `parentcatid` int(11) NOT NULL DEFAULT -1,
           `category` varchar(60) NOT NULL DEFAULT '',
@@ -81,8 +75,7 @@ table_definitions = {
           `numitems` int(11) NOT NULL DEFAULT 0,
           PRIMARY KEY (`catid`)
           ) ENGINE=MyISAM;""",
-    'challenges':
-        """CREATE TABLE `{0}` (
+    "challenges": """CREATE TABLE `{0}` (
           `chalid` int(11) NOT NULL AUTO_INCREMENT,
           `challenger` varchar(200) NOT NULL DEFAULT '',
           `uid` int(11) NOT NULL DEFAULT 0,
@@ -93,8 +86,7 @@ table_definitions = {
           `responses` int(11) NOT NULL DEFAULT 0,
           PRIMARY KEY (`chalid`)
           ) ENGINE=MyISAM;""",
-    'chapters':
-        """CREATE TABLE `{0}` (
+    "chapters": """CREATE TABLE `{0}` (
           `chapid` int(11) NOT NULL AUTO_INCREMENT,
           `title` varchar(250) NOT NULL DEFAULT '',
           `inorder` int(11) NOT NULL DEFAULT 0,
@@ -110,8 +102,7 @@ table_definitions = {
           `count` int(11) NOT NULL DEFAULT 0,
           PRIMARY KEY (`chapid`)
           ) ENGINE=MyISAM;""",
-    'characters':
-        """CREATE TABLE `{0}` (
+    "characters": """CREATE TABLE `{0}` (
           `charid` int(11) NOT NULL AUTO_INCREMENT,
           `catid` int(11) NOT NULL DEFAULT 0,
           `charname` varchar(60) NOT NULL DEFAULT '',
@@ -119,28 +110,24 @@ table_definitions = {
           `image` varchar(200) NOT NULL DEFAULT '',
           PRIMARY KEY (`charid`)
           ) ENGINE=MyISAM;""",
-    'classes':
-        """CREATE TABLE `{0}` (
+    "classes": """CREATE TABLE `{0}` (
           `class_id` int(11) NOT NULL AUTO_INCREMENT,
           `class_type` int(11) NOT NULL DEFAULT 0,
           `class_name` varchar(100) NOT NULL DEFAULT '',
           PRIMARY KEY (`class_id`)
           ) ENGINE=MyISAM;""",
-    'classtypes':
-        """CREATE TABLE `{0}` (
+    "classtypes": """CREATE TABLE `{0}` (
           `classtype_id` int(11) NOT NULL AUTO_INCREMENT,
           `classtype_name` varchar(50) NOT NULL DEFAULT '',
           `classtype_title` varchar(50) NOT NULL DEFAULT '',
           PRIMARY KEY (`classtype_id`)
           ) ENGINE=MyISAM;""",
-    'coauthors':
-        """CREATE TABLE `{0}` (
+    "coauthors": """CREATE TABLE `{0}` (
           `sid` int(11) NOT NULL DEFAULT 0,
           `uid` int(11) NOT NULL DEFAULT 0,
           PRIMARY KEY (`sid`,`uid`)
           ) ENGINE=MyISAM;""",
-    'codeblocks':
-        """CREATE TABLE `{0}` (
+    "codeblocks": """CREATE TABLE `{0}` (
             `code_id`     int(11) NOT NULL AUTO_INCREMENT,
             `code_text`   text    NOT NULL,
             `code_type`   varchar(20) DEFAULT NULL,
@@ -149,8 +136,7 @@ table_definitions = {
             KEY `code_type` (`code_type`)
         ) ENGINE = MyISAM;
         """,
-    'comments':
-        """CREATE TABLE `{0}` (
+    "comments": """CREATE TABLE `{0}` (
             `cid`     int(11)  NOT NULL AUTO_INCREMENT,
             `nid`     int(11)  NOT NULL DEFAULT '0',
             `uid`     int(11)  NOT NULL DEFAULT '0',
@@ -159,8 +145,7 @@ table_definitions = {
             PRIMARY KEY (`cid`),
             KEY `commentlist` (`nid`, `time`)
         ) ENGINE = MyISAM;""",
-    'favorites':
-        """CREATE TABLE `{0}` (
+    "favorites": """CREATE TABLE `{0}` (
             `uid`      int(11) NOT NULL DEFAULT '0',
             `item`     int(11) NOT NULL DEFAULT '0',
             `type`     char(2) NOT NULL DEFAULT '',
@@ -168,8 +153,7 @@ table_definitions = {
             UNIQUE KEY `byitem` (`item`, `type`, `uid`),
             UNIQUE KEY `byuid` (`uid`, `type`, `item`)
         ) ENGINE = MyISAM;""",
-    'inseries':
-        """CREATE TABLE `{0}` (
+    "inseries": """CREATE TABLE `{0}` (
           `seriesid` int(11) NOT NULL DEFAULT 0,
           `sid` int(11) NOT NULL DEFAULT 0,
           `subseriesid` int(11) NOT NULL DEFAULT 0,
@@ -178,8 +162,7 @@ table_definitions = {
           PRIMARY KEY (`sid`,`seriesid`,`subseriesid`),
           KEY `seriesid` (`seriesid`,`inorder`)
           ) ENGINE=MyISAM;""",
-    'log':
-        """CREATE TABLE `{0}` (
+    "log": """CREATE TABLE `{0}` (
               `log_id`        int(11)    NOT NULL AUTO_INCREMENT,
               `log_action`    varchar(255)        DEFAULT NULL,
               `log_uid`       int(11)    NOT NULL,
@@ -188,8 +171,7 @@ table_definitions = {
               `log_type`      varchar(2) NOT NULL,
               PRIMARY KEY (`log_id`)
           ) ENGINE = MyISAM;""",
-    'messages':
-        """CREATE TABLE `{0}` (
+    "messages": """CREATE TABLE `{0}` (
           `message_id`    int(11)      NOT NULL AUTO_INCREMENT,
           `message_name`  varchar(50)  NOT NULL DEFAULT '',
           `message_title` varchar(200) NOT NULL DEFAULT '',
@@ -197,15 +179,14 @@ table_definitions = {
           PRIMARY KEY (`message_id`),
           KEY `message_name` (`message_name`)
       ) ENGINE = MyISAM;""",
-    'modules':
-        """CREATE TABLE `{0}` (
+    "modules": """CREATE TABLE `{0}` (
           `id`      int(11)                                                     NOT NULL AUTO_INCREMENT,
           `name`    varchar(100) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL DEFAULT 'Test Module',
           `version` varchar(10) CHARACTER SET latin1 COLLATE latin1_general_ci  NOT NULL DEFAULT '1.0',
           PRIMARY KEY (`id`),
           KEY `name_version` (`name`, `version`)
           ) ENGINE = MyISAM;""",
-    'news': """CREATE TABLE `{0}` (
+    "news": """CREATE TABLE `{0}` (
           `nid`      int(11)      NOT NULL AUTO_INCREMENT,
           `author`   varchar(60)  NOT NULL DEFAULT '',
           `title`    varchar(255) NOT NULL DEFAULT '',
@@ -214,8 +195,7 @@ table_definitions = {
           `comments` int(11)      NOT NULL DEFAULT '0',
           PRIMARY KEY (`nid`)
       ) ENGINE = MyISAM;""",
-    'pagelinks':
-        """CREATE TABLE `{0}` (
+    "pagelinks": """CREATE TABLE `{0}` (
           `link_id`     int(11)      NOT NULL AUTO_INCREMENT,
           `link_name`   varchar(50)  NOT NULL DEFAULT '',
           `link_text`   varchar(100) NOT NULL DEFAULT '',
@@ -226,8 +206,7 @@ table_definitions = {
           PRIMARY KEY (`link_id`),
           KEY `link_name` (`link_name`)
       ) ENGINE = MyISAM;""",
-    'panels':
-        """CREATE TABLE `{0}` (
+    "panels": """CREATE TABLE `{0}` (
             `panel_id`     int(11)      NOT NULL AUTO_INCREMENT,
             `panel_name`   varchar(50)  NOT NULL DEFAULT 'unknown',
             `panel_title`  varchar(100) NOT NULL DEFAULT 'Unnamed Panel',
@@ -239,15 +218,14 @@ table_definitions = {
             PRIMARY KEY (`panel_id`),
             KEY `panel_type` (`panel_type`, `panel_name`)
         ) ENGINE = MyISAM;""",
-    'ratings':
-        """CREATE TABLE `{0}` (
+    "ratings": """CREATE TABLE `{0}` (
           `rid` int(11) NOT NULL AUTO_INCREMENT,
           `rating` varchar(60) NOT NULL DEFAULT '',
           `ratingwarning` char(1) NOT NULL DEFAULT '0',
           `warningtext` text NOT NULL,
           PRIMARY KEY (`rid`)
           ) ENGINE=MyISAM;""",
-    'reviews': """CREATE TABLE `{0}` (
+    "reviews": """CREATE TABLE `{0}` (
         `reviewid` int(11)     NOT NULL AUTO_INCREMENT,
         `item`     int(11)     NOT NULL DEFAULT '0',
         `chapid`   int(11)     NOT NULL DEFAULT '0',
@@ -266,7 +244,7 @@ table_definitions = {
         KEY `bychapter` (`chapid`, `rating`),
         KEY `byuid` (`uid`, `item`, `type`)
     ) ENGINE = MyISAM;""",
-    'series': """CREATE TABLE `{0}` (
+    "series": """CREATE TABLE `{0}` (
           `seriesid` int(11) NOT NULL AUTO_INCREMENT,
           `title` varchar(200) NOT NULL DEFAULT '',
           `summary` text DEFAULT NULL,
@@ -283,7 +261,7 @@ table_definitions = {
           `numstories` int(11) NOT NULL DEFAULT 0,
           PRIMARY KEY (`seriesid`)
           ) ENGINE=MyISAM;""",
-    'settings': """CREATE TABLE `{0}` (
+    "settings": """CREATE TABLE `{0}` (
             `sitekey`        varchar(50)  NOT NULL DEFAULT '1',
             `sitename`       varchar(200) NOT NULL DEFAULT 'Your Site',
             `slogan`         varchar(200) NOT NULL DEFAULT 'It''s a cool site!',
@@ -341,8 +319,7 @@ table_definitions = {
             `smtp_password`  varchar(50)           DEFAULT NULL,
             PRIMARY KEY (`sitekey`)
         ) ENGINE = MyISAM;""",
-    'stats':
-        """CREATE TABLE `{0}` (
+    "stats": """CREATE TABLE `{0}` (
             `sitekey`      varchar(50) NOT NULL DEFAULT '0',
             `stories`      int(11)     NOT NULL DEFAULT '0',
             `chapters`     int(11)     NOT NULL DEFAULT '0',
@@ -354,8 +331,7 @@ table_definitions = {
             `reviewers`    int(11)     NOT NULL DEFAULT '0',
             `newestmember` int(11)     NOT NULL DEFAULT '0'
         ) ENGINE = MyISAM;""",
-    'stories':
-        """CREATE TABLE `{0}` (
+    "stories": """CREATE TABLE `{0}` (
           `sid` int(11) NOT NULL AUTO_INCREMENT,
           `title` varchar(200) NOT NULL DEFAULT '',
           `summary` text,
@@ -379,7 +355,7 @@ table_definitions = {
           `challenges` varchar(200) NOT NULL DEFAULT '0',
           PRIMARY KEY (`sid`)
         ) ENGINE=MyISAM;
-        """
+        """,
 }
 
 
@@ -389,7 +365,7 @@ def create_def(table_name):
     :param table_name: the original table name (eg: fanfiction_stories)
     :return: the DROP and CREATE statements for this table
     """
-    key = re.sub(r'\S+_', '', table_name)
+    key = re.sub(r"\S+_", "", table_name)
     if key:
         drop_table_def = f"\nDROP TABLE IF EXISTS `{table_name}`;"
         create_table_def = table_definitions[key].format(table_name)

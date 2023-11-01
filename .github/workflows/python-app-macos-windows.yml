@@ -32,6 +32,9 @@ jobs:
       - name: Lint with ruff
         run: |
           ruff check .
+      - name: Check formatting with ruff
+        run : |
+          ruff format --check .
       - name: Test with pytest - exclude MySQL integration tests
         run: |
           pytest --ignore "opendoors/tests/test_sql_db.py" --ignore "efiction/tests/test_metadata.py"

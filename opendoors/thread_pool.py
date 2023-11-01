@@ -1,5 +1,6 @@
 from threading import Thread
 
+
 class ThreadedPool:
     def __init__(self, number_of_threads: int):
         """
@@ -10,7 +11,7 @@ class ThreadedPool:
 
     def map(self, func, work):
         """
-        Maps threads to work to be done, does not return values returned by 
+        Maps threads to work to be done, does not return values returned by
         function
         :param func: a callable that will be called with *args from work
         :param work: List of lists with args
@@ -31,4 +32,3 @@ class ThreadedPool:
         for job in jobs:
             job.join()
         print()
-
