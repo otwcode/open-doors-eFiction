@@ -1,12 +1,8 @@
 import datetime
 from unittest import TestCase
-from unittest.mock import MagicMock
 
-from efiction.metadata import EFictionMetadata
 from efiction.tests.test_utils import load_fixtures, create_efiction_converter
-from opendoors.config import ArchiveConfig
-from opendoors.mysql import SqlDb
-from opendoors.utils import get_full_path, remove_output_files
+from opendoors.utils import remove_output_files
 
 
 class TestEFictionConverter(TestCase):

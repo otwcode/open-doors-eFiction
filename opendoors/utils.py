@@ -6,7 +6,6 @@ import html
 import os
 import re
 import shutil
-import sys
 from typing import Mapping
 from pathlib import Path
 
@@ -136,7 +135,7 @@ def remove_output_files(path: str):
                 shutil.rmtree(file)
             else:
                 os.remove(file)
-        except PermissionError as pe:
+        except PermissionError:
             # We don't necessarily care that much
             continue
 

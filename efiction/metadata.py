@@ -1,4 +1,3 @@
-import os
 import re
 from configparser import ConfigParser
 from logging import Logger
@@ -152,7 +151,7 @@ class EFictionMetadata:
     def _convert_tags_join(self, new_story, tags, sql=None):
         # Support using non-default sql connection for multithreaded workloads
         sql = self.sql if sql is None else sql
-        full_query = f"INSERT INTO item_tags (item_id, item_type, tag_id) VALUES "
+        full_query = "INSERT INTO item_tags (item_id, item_type, tag_id) VALUES "
         tag_query = []
         for tag_list in tags.values():
             for tag in tag_list:
@@ -176,7 +175,7 @@ class EFictionMetadata:
         # get a dict of coauthor IDs for the story
         try:
             authors = sql.execute_and_fetchall(self.working_original, full_query)
-        except Exception as e:
+        except Exception:
             authors = None
             self.logger.info("No coauthors table...")
         # We only try to operate on this result if it is not None
@@ -219,12 +218,12 @@ class EFictionMetadata:
             """
             sql.execute(self.working_open_doors, query)
 
-            self.logger.debug(f"  tags...")
+            self.logger.debug("  tags...")
             tags = self._convert_story_tags(old_story)
             # pass the new sql to be used instead of the main one
             self._convert_tags_join(new_story, tags, sql)
 
-            self.logger.debug(f"  authors...")
+            self.logger.debug("  authors...")
             self._convert_author_join(new_story, old_story['uid'], sql)
             # Find if there are any coauthors for the work
             coauthors = self.fetch_coauthors(new_story, sql)

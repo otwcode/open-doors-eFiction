@@ -29,7 +29,7 @@ class TagConverter:
             if tag_table_name == 'rating':
                 # Only one rating per story, so story rating should be single number
                 # that exactly matches rating id
-                query = f"SELECT count(*) as cnt FROM stories WHERE rid NOT IN (SELECT rid FROM ratings);"
+                query = "SELECT count(*) as cnt FROM stories WHERE rid NOT IN (SELECT rid FROM ratings);"
                 count: List[Dict[str, int]] = self.sql.execute_and_fetchall(self.working_original, query)
                 tag_tables['rating'] = bool(count and count[0]['cnt'] > 0)
             else:
@@ -53,7 +53,7 @@ class TagConverter:
                         tags = list(map(lambda story_tags: story_tags[id_name].replace(',', ''), tags))
                         int(''.join(tags))
                         tag_tables[tag_table_name] = False
-                    except Exception as e:
+                    except Exception:
                         # Non-integer in identifier
                         tag_tables[tag_table_name] = True
                 except Exception as e:

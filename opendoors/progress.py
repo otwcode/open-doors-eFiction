@@ -29,14 +29,14 @@ def continue_from_last(config: ConfigParser, logger: Logger, sql: SqlDb, steps: 
                     next_step = config['Processing']['next_step'] = step.next_step
                     update_done_steps(config, done_steps, step_to_run)
             else:
-                restart_yn = input(f"All steps have been completed for this archive. Do you want to\n"
+                restart_yn = input("All steps have been completed for this archive. Do you want to\n"
                                    "1. Restart from step 1\n"
                                    "2. Exit (default - press Enter)\n>> ")
                 if restart_yn == "1":
                     next_step = "01"
                 else:
                     run_next = False
-    except Exception as e:
+    except Exception:
         logger.error(traceback.format_exc())
 
 

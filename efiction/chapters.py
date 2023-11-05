@@ -96,7 +96,7 @@ follow the instructions in readme and then run it with this command:
                     # check if encoding is valid
                     ''.encode(encoding_text)
                     encoding = encoding_text
-                except:
+                except LookupError:
                     print(f"{encoding_text} is not a valid encoding, try again")
         for old_chapter in old_chapters:
             chapid = old_chapter['chapid']

@@ -4,11 +4,10 @@ import re
 import shutil
 from pathlib import Path
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from opendoors.config import ArchiveConfig
 from opendoors.step_base import StepInfo
-from steps.step_01 import Step01
 from steps.step_02 import Step02
 
 test_logger = MagicMock()
@@ -26,7 +25,7 @@ class TestStep02(TestCase):
                     shutil.rmtree(file)
                 else:
                     os.remove(file)
-            except PermissionError as pe:
+            except PermissionError:
                 # We don't necessarily care that much
                 continue
 
