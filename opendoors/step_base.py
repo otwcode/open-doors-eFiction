@@ -10,10 +10,11 @@ from opendoors.utils import make_banner, get_prefixed_path
 
 
 @dataclass
-class StepInfo():
+class StepInfo:
     """
     Data class for steps.
     """
+
     step_number: str
     step_description: str
     next_step: str
@@ -24,22 +25,31 @@ class StepBase:
     Base for processing steps.
     """
 
-    def __init__(self, config: ConfigParser, logger: Logger, sql: SqlDb, step_info: StepInfo):
+    def __init__(
+        self, config: ConfigParser, logger: Logger, sql: SqlDb, step_info: StepInfo
+    ):
         self.next_step = step_info.next_step
         self.sql = sql
         self.logger = logger
         self.config = config
-        self.code_name = config['Archive']['code_name']
+        self.code_name = config["Archive"]["code_name"]
         self.step = step_info.step_number
         self.step_path = self.create_working_sub_dir()
-        banner = make_banner('-', f'   Running Step {step_info.step_number}: {step_info.step_description}   ')
+        banner = make_banner(
+            "-",
+            f"   Running Step {step_info.step_number}: {step_info.step_description}   ",
+        )
         self.logger.info(banner)
 
     def create_working_sub_dir(self):
-        self.step_path = get_prefixed_path(self.step, self.config['Processing']['working_dir'])
+        self.step_path = get_prefixed_path(
+            self.step, self.config["Processing"]["working_dir"]
+        )
         if os.path.exists(self.step_path):
             shutil.rmtree(self.step_path)
-            self.logger.info(f"Deleted existing {self.step} folder to start from scratch")
+            self.logger.info(
+                f"Deleted existing {self.step} folder to start from scratch"
+            )
         os.makedirs(self.step_path)
         return self.step_path
 
@@ -59,6 +69,8 @@ class StepBase:
         if self.next_step is None:
             self.logger.info("All steps completed.")
         else:
-            self.logger.info(f"\nStep {self.step} completed, ready for step {self.next_step}\n")
-            self.config['Processing']['next_step'] = self.next_step
+            self.logger.info(
+                f"\nStep {self.step} completed, ready for step {self.next_step}\n"
+            )
+            self.config["Processing"]["next_step"] = self.next_step
         return True

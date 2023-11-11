@@ -2,13 +2,14 @@ from .mysql import SqlDb
 from tempfile import NamedTemporaryFile
 from os import unlink
 
+
 class BigInsert:
     def __init__(self, database: str, table_name: str, columns: list, sql: SqlDb):
         """
         Handles `Load data local infile` inserts
-        :param database: Name of database to use 
-        :param table_name: Name of table to insert to 
-        :param columns: list of column names, the order of those is used in addRow() 
+        :param database: Name of database to use
+        :param table_name: Name of table to insert to
+        :param columns: list of column names, the order of those is used in addRow()
             method
         :param sql: A connection to mysql to use
         """
@@ -16,7 +17,9 @@ class BigInsert:
         self._sql.ensure_local_infile()
         self._database = database
         self._columns = columns
-        self._tempfile = NamedTemporaryFile("w+", delete=False, suffix=".otw.tmp", encoding="utf-8")
+        self._tempfile = NamedTemporaryFile(
+            "w+", delete=False, suffix=".otw.tmp", encoding="utf-8"
+        )
         # convert windows slashes to unix because windows needs it like that?
         windows_friendly_name = self._tempfile.name.replace("\\", "/")
         # We are storing data as a `tab separated` file
@@ -26,7 +29,7 @@ class BigInsert:
         #
         # However we need to preserve newlines because they will eventually get
         # cleaned up into proper tags, hence we will escape them into proper \n
-        self._query = fr"""
+        self._query = rf"""
             LOAD DATA LOCAL INFILE '{windows_friendly_name}'
             INTO TABLE {table_name}
             FIELDS TERMINATED BY '\t' ESCAPED BY '\\'
@@ -46,7 +49,10 @@ class BigInsert:
         if len(args) != len(self._columns):
             raise Exception("Number of arguments does not equal number of columns!")
         # remove tabs and escape newlines
-        values = [x.replace("\t", " ").replace("\n", "\\n") if isinstance(x, str) else str(x) for x in args]
+        values = [
+            x.replace("\t", " ").replace("\n", "\\n") if isinstance(x, str) else str(x)
+            for x in args
+        ]
         line = "\t".join(values) + "\n"
         self._tempfile.write(line)
 
@@ -60,5 +66,3 @@ class BigInsert:
         # delete file
         unlink(self._tempfile.name)
         self._tempfile = None
-        
-

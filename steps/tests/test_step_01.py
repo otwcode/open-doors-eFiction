@@ -17,8 +17,12 @@ test_config = ArchiveConfig(MagicMock(), "test", "steps/tests/test_data").config
 
 class TestStep01(TestCase):
     def tearDown(self) -> None:
-        """ Remove any files generated in test_output """
-        filtered = [f for f in glob.glob('steps/tests/test_output/*') if not re.match(r'\.keep', f)]
+        """Remove any files generated in test_output"""
+        filtered = [
+            f
+            for f in glob.glob("steps/tests/test_output/*")
+            if not re.match(r"\.keep", f)
+        ]
         for file in filtered:
             try:
                 if Path(file).is_dir():
@@ -29,7 +33,7 @@ class TestStep01(TestCase):
                 # We don't necessarily care that much
                 continue
 
-    @patch('builtins.input', lambda *args: 'efiction/tests/test_data/efiction.sql')
+    @patch("builtins.input", lambda *args: "efiction/tests/test_data/efiction.sql")
     def test_run(self):
         step_info = StepInfo("test_output/01", "Test step 01", "02")
         thing = Step01(test_config, test_logger, test_sql, step_info).run()
