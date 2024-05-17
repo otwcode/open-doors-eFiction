@@ -39,7 +39,7 @@ table_definitions = {
             `contact`    tinyint(1)   NOT NULL DEFAULT '0',
             `stories`    int(11)      NOT NULL DEFAULT '0',
             PRIMARY KEY (`uid`)
-        ) ENGINE = MyISAM""",
+        ) ENGINE = MyISAM;""",
     "authors": """CREATE TABLE `{0}` (
           `uid` int(11) NOT NULL AUTO_INCREMENT,
           `penname` varchar(200) NOT NULL DEFAULT '',
