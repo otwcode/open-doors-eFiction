@@ -153,10 +153,20 @@ class EFictionMetadata:
         if self.tag_table_is_nonstandard[table_name]:
             # Tag table identified by name rather than id.
             original_tagid = "original_tag"
+
+        valid_tag_ids = {
+            str(c[original_tagid]): c["id"] for c in self.tag_tables[table_name]
+        }
+
+        dropped_tags = [
+            tag for tag in old_tags[table_name] if tag and tag not in valid_tag_ids
+        ]
+        if dropped_tags:
+            self.logger.warning(
+                f"Found tags in stories but not in tag table: {dropped_tags}"
+            )
         return [
-            c["id"]
-            for c in self.tag_tables[table_name]
-            if str(c[original_tagid]) in old_tags[table_name]
+            valid_tag_ids[tag] for tag in old_tags[table_name] if tag in valid_tag_ids
         ]
 
     def _convert_story_tags(self, old_story):

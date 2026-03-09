@@ -3,7 +3,7 @@ from logging import Logger
 
 from typing import Dict, List
 
-from opendoors.mysql import SqlDb
+from opendoors.mysql import OperationalError, ProgrammingError, SqlDb
 from opendoors.utils import print_progress
 
 
@@ -56,20 +56,43 @@ class TagConverter:
 
                 try:
                     query = f"SELECT {id_name} FROM stories;"
-                    tags = self.sql.execute_and_fetchall(self.working_original, query)
-                    try:
-                        tags = list(
-                            map(
-                                lambda story_tags: story_tags[id_name].replace(",", ""),
-                                tags,
-                            )
+                    tag_rows = self.sql.execute_and_fetchall(
+                        self.working_original, query
+                    )
+                    story_tags = [tag_row[id_name] for tag_row in tag_rows]
+                    # Get the number of story tags which contain something other
+                    # than a comma-separated list of digits
+                    is_numeric = [
+                        not tag or tag.isdigit()
+                        for tags in story_tags
+                        for tag in tags.split(",")
+                    ]
+
+                    # There are three possibilities for the way tags have been
+                    # put into stories. The most common, by far, is that they're
+                    # all comma-separated lists of integers. If this is not the
+                    # case, then they should be almost all -- though not
+                    # necessarily all -- comma-separated strings. (This is
+                    # because a tag could potentially be all-numeric, and have
+                    # at least one fic only tagged with that all-numeric tag).
+                    if sum(is_numeric) == len(is_numeric):
+                        self.logger.debug(
+                            f"Standard story tag syntax in {tag_table_name}"
                         )
-                        int("".join(tags))
                         tag_tables[tag_table_name] = False
-                    except Exception:
-                        # Non-integer in identifier
+
+                    elif (sum(is_numeric) / len(is_numeric)) < 0.1:
+                        self.logger.info(
+                            f"Non-standard story tag syntax in {tag_table_name}"
+                        )
                         tag_tables[tag_table_name] = True
-                except Exception as e:
+
+                    # Finally, the fields could be completely corrupt -- in which case we want to break.
+                    else:
+                        raise Exception(
+                            f"Broken story tag syntax in {tag_table_name}; mix of standard (numeric) and non-standard (string) tags."
+                        )
+                except (OperationalError, ProgrammingError) as e:
                     self.logger.info(e)
                     self.logger.info("No such table?")
                     tag_tables[tag_table_name] = None

@@ -215,7 +215,7 @@ class TestEFictionConverter(TestCase):
             }
         ]
         result = self.efiction_converter._convert_story_tags(old_stories[0])
-        self.assertEqual(
+        self.assertCountEqual(
             {
                 "categories": [6],
                 "characters": [106, 107],

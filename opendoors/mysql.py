@@ -6,6 +6,7 @@ from typing import Tuple
 import pymysql
 import sqlparse
 from pymysql.cursors import DictCursor
+from pymysql.err import OperationalError, ProgrammingError  # noqa: F401
 
 from opendoors.utils import get_full_path
 
