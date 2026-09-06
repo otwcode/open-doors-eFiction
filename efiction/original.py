@@ -33,7 +33,6 @@ class EFictionOriginal:
         self.logger = logger
         self.code_name = config["Archive"]["code_name"]
         self.edited_db_name = f"{prep_db_name(self.code_name)}_efiction_original"
-        #self.edited_file_name = f"{self.code_name}_efiction_original_edited.sql"
 
     @staticmethod
     def _contains_table_defs(grouped_statements):
@@ -121,7 +120,9 @@ class EFictionOriginal:
         :return:
         """
         self.logger.info("...writing edited SQL statements to a backup file...")
-        edited_file_path = get_prefixed_path("01", step_path, f"{self.edited_db_name}.sql")
+        edited_file_path = get_prefixed_path(
+            "01", step_path, f"{self.edited_db_name}.sql"
+        )
         self.config["Processing"]["original_edited_file"] = edited_file_path
         edited_file = write_statements_to_file(
             self.config["Processing"]["original_edited_file"], statements
