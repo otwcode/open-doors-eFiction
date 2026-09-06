@@ -44,6 +44,7 @@ class EFictionSimplified:
             f"{prep_db_name(self.code_name)}_efiction_original_simplified"
         )
         self.simplified_file_name = f"{self.code_name}_efiction_original_simplified.sql"
+        self.simplified_db_name = f"{prep_db_name(self.code_name)}_efiction_original_simplified"
 
     def __is_table_to_keep(self, table_name: str):
         """
