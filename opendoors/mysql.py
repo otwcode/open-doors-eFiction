@@ -119,10 +119,7 @@ class SqlDb:
 
     def drop_database(self, database: str):
         cursor = self.conn.cursor()
-        try:
-            cursor.execute(f"DROP DATABASE IF EXISTS {database};")
-        except Exception as e:
-            print(f"could not drop database: {e}")
+        cursor.execute(f"DROP DATABASE IF EXISTS {database};")
         self.conn.commit()
 
     def dump_database(self, database: str, destination_filepath: str):

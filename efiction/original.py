@@ -130,10 +130,7 @@ class EFictionOriginal:
         self.logger.info(
             "...removing any existing edited original database in MySQL..."
         )
-        try:
-            self.sql.drop_database(self.edited_db_name)
-        except Exception as e:
-            self.logger.info(f"error with database drop at line 132: {e}. continuing")
+        self.sql.drop_database(self.edited_db_name)
 
         self.logger.info("...loading edited original database into MySQL...")
         self.sql.load_sql_file_into_db(edited_file)
