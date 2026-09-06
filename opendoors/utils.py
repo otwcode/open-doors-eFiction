@@ -20,6 +20,10 @@ def get_full_path(path):
     full_path: Path = Path(path).resolve(strict=False)
     return str(full_path)
 
+def prep_db_name(config_name):
+    config_split = str(config_name).split("/")
+    return config_split[-1]
+
 
 def copy_to_dir(old_file_path, new_file_dir, new_file_name):
     """

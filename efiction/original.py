@@ -17,6 +17,7 @@ from opendoors.utils import (
     copy_to_dir,
     get_full_path,
     get_prefixed_path,
+    prep_db_name
 )
 
 
@@ -31,7 +32,7 @@ class EFictionOriginal:
         self.config = config
         self.logger = logger
         self.code_name = config["Archive"]["code_name"]
-        self.edited_db_name = f"{self.code_name}_efiction_original"
+        self.edited_db_name = f"{prep_db_name(self.code_name)}_efiction_original"
         self.edited_file_name = f"{self.code_name}_efiction_original_edited.sql"
 
     @staticmethod
@@ -129,7 +130,10 @@ class EFictionOriginal:
         self.logger.info(
             "...removing any existing edited original database in MySQL..."
         )
-        self.sql.drop_database(self.edited_db_name)
+        try:
+            self.sql.drop_database(self.edited_db_name)
+        except Exception as e:
+            self.logger.info(f"error with database drop at line 132: {e}. continuing")
 
         self.logger.info("...loading edited original database into MySQL...")
         self.sql.load_sql_file_into_db(edited_file)
