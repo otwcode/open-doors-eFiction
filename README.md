@@ -24,7 +24,7 @@ For example, if the archive is called "My Awesome Archive of Fandom Awesomeness"
     ```
 1. Run 
    ```bash
-   python start.py CODENAME PATH-TO-WORKING-DIRECTORY
+   python3 start.py CODENAME PATH-TO-WORKING-DIRECTORY
    ``` 
     where:
     
@@ -40,7 +40,7 @@ Note that the process will create databases and tables in MySQL as well as files
 
 1. Run 
    ```bash
-   python start.py CODENAME PATH-TO-WORKING-DIRECTORY
+   python3 start.py CODENAME PATH-TO-WORKING-DIRECTORY
    ``` 
     where:
     

@@ -19,7 +19,7 @@ from opendoors.utils import (
     key_find,
     normalize,
     print_progress,
-    prep_db_name
+    prep_db_name,
 )
 
 

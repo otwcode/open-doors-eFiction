@@ -17,7 +17,7 @@ from opendoors.utils import (
     copy_to_dir,
     get_full_path,
     get_prefixed_path,
-    prep_db_name
+    prep_db_name,
 )
 
 
