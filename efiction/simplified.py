@@ -9,7 +9,7 @@ from opendoors.sql_utils import (
     parse_remove_comments,
     write_statements_to_file,
 )
-from opendoors.utils import get_full_path, get_prefixed_path
+from opendoors.utils import get_full_path, get_prefixed_path, prep_db_name
 
 
 class EFictionSimplified:
@@ -40,7 +40,9 @@ class EFictionSimplified:
         self.config = config
         self.logger = logger
         self.code_name = config["Archive"]["code_name"]
-        self.simplified_db_name = f"{self.code_name}_efiction_original_simplified"
+        self.simplified_db_name = (
+            f"{prep_db_name(self.code_name)}_efiction_original_simplified"
+        )
         self.simplified_file_name = f"{self.code_name}_efiction_original_simplified.sql"
 
     def __is_table_to_keep(self, table_name: str):

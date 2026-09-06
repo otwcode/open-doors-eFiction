@@ -19,6 +19,7 @@ from opendoors.utils import (
     key_find,
     normalize,
     print_progress,
+    prep_db_name,
 )
 
 
@@ -59,9 +60,10 @@ class EFictionMetadata:
         :return: True if successful
         """
         od_table_sql_file = get_full_path("opendoors/open-doors-tables-working.sql")
+
         self.config["Processing"][
             "open_doors_working_db"
-        ] = f"{self.config['Archive']['code_name']}_working_open_doors"
+        ] = f"{prep_db_name(self.config['Archive']['code_name'])}_working_open_doors"
         self.config["Processing"]["open_doors_working_db_file"] = get_prefixed_path(
             "03", step_path, f"{self.config['Processing']['open_doors_working_db']}.sql"
         )
