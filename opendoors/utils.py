@@ -171,3 +171,11 @@ def get_prefixed_path(step: str, path: str, filename: str = ""):
         return os.path.join(path, f"{prefix}-{filename}")
     else:
         return os.path.join(path, prefix)
+
+
+def sanitize_codename(codename: str):
+    """
+    processes and sanitizes the archive codename used for db identifiers and file naming
+    """
+    newname = "".join([x for x in list(codename.lower()) if x.isalpha()])
+    return newname[:10]

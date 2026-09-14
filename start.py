@@ -8,7 +8,7 @@ from opendoors.config import ArchiveConfig
 from opendoors.logging import Logging
 from opendoors.mysql import SqlDb
 from opendoors.step_base import StepInfo
-from opendoors.utils import make_banner, set_working_dir
+from opendoors.utils import make_banner, set_working_dir, sanitize_codename
 from steps import step_01, step_02, step_03, step_04
 
 steps = {
@@ -62,22 +62,26 @@ if __name__ == "__main__":
     Example: python3 start.py mvw /users/me/otw_opendoors
     Prompts user if no codename is given, and uses an "otw_opendoors" in the user's home directory if no root path given
     """
-    if len(sys.argv) > 1:
-        code_name = sys.argv[1]
-    else:
-        code_name = None
-        while code_name == None or any(  # noqa: E711
-            [x not in "qwertyuiopasdfghjklzxcvbnm" for x in code_name]
-        ):
-            code_name = input(
-                "Please provide a short, lowercase code name with no spaces or punctuation for the archive "
-                "you are processing (and make a note of it as you'll need it in future!):\n>> "
+    if len(sys.argv) != 3:
+        code_name = sanitize_codename(
+            input(
+                "Please provide a short, lowercase code name with no spaces or punctuation for the archive: "
+                "\n>> "
             )
+        )
+        path = input("Please provide a full path to the working directory: " "\n>> ")
+    else:
+        code_name = sanitize_codename(sys.argv[1])
+        path = sys.argv[2]
+
+    print(
+        f"Your codename is: {code_name}\n"
+        "(note: If this is different from your input, this is because it has been sanitized for MySQL safety)"
+    )
 
     banner_text = f"""Starting processing for archive "{code_name}"..."""
     banner = make_banner("=", banner_text)
 
-    path = sys.argv[2] if len(sys.argv) > 2 else None
     working_dir = set_working_dir(path, code_name)
 
     logger = Logging(working_dir, code_name).logger()
